@@ -9,70 +9,77 @@
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 20px; background: #f4f7f9; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; background: white; }
         #result-section { margin-top: 20px; padding: 20px; background: white; border-radius: 12px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .student-info { font-size: 22px; font-weight: bold; color: #d9534f; margin: 10px 0; }
-        input[type="number"] { padding: 12px; font-size: 18px; width: 80%; margin: 15px 0; border-radius: 8px; border: 2px solid #ddd; }
-        button { padding: 15px 40px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; background: #28a745; color: white; width: 80%; }
-        .btn-scan-again { background: #6c757d; margin-top: 10px; }
+        .info-box { background: #e9ecef; padding: 15px; border-radius: 8px; margin: 10px 0; font-size: 18px; }
+        .highlight { font-weight: bold; color: #0056b3; font-size: 24px; }
+        input[type="number"] { padding: 12px; font-size: 20px; width: 80%; margin: 15px 0; border-radius: 8px; border: 2px solid #ddd; }
+        button { padding: 15px 40px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; background: #28a745; color: white; width: 80%; margin-bottom: 10px; }
+        .btn-cancel { background: #6c757d; }
     </style>
 </head>
 <body>
 
     <h2>💰 夏令營虛擬銀行</h2>
-    
     <div id="reader"></div>
     
     <div id="result-section">
-        <p>學員帳戶</p>
-        <div class="student-info" id="student-id"></div>
-        <input type="number" id="amount" placeholder="輸入金額 (例: 50 或 -20)" inputmode="decimal">
+        <div class="info-box">
+            學員：<span id="display-name" class="highlight">讀取中...</span><br>
+            目前餘額：<span id="display-balance" class="highlight">---</span>
+        </div>
+        
+        <input type="number" id="amount" placeholder="輸入變動金額 (如: -20)" inputmode="decimal">
         <br>
-        <button id="send-btn" onclick="sendData()">確認送出交易</button>
-        <button class="btn-scan-again" onclick="location.reload()">重新掃描</button>
+        <button id="send-btn" onclick="sendData()">確認交易</button>
+        <button class="btn-cancel" onclick="location.reload()">取消/重新掃描</button>
     </div>
 
     <script>
-        const scriptURL = "這裡換成你的AppsScript網址"; 
-        let currentStudentId = "";
+        const scriptURL = "你的AppsScript網址"; 
+        let currentId = "";
         let html5QrcodeScanner;
 
         function onScanSuccess(decodedText) {
-            currentStudentId = decodedText;
-            document.getElementById('student-id').innerText = "ID: " + decodedText;
+            currentId = decodedText;
+            document.getElementById('reader').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            document.getElementById('reader').style.display = 'none'; // 隱藏掃描器
-            
-            if (navigator.vibrate) navigator.vibrate(50);
-            
-            // 自動停止相機鏡頭
-            html5QrcodeScanner.clear().catch(error => console.error("停止失敗", error));
+            html5QrcodeScanner.clear();
+
+            // 掃描後立即查詢帳戶資訊
+            fetch(`${scriptURL}?id=${currentId}&amount=0`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "info") {
+                    document.getElementById('display-name').innerText = data.name;
+                    document.getElementById('display-balance').innerText = data.balance;
+                } else {
+                    alert("錯誤：" + data.message);
+                    location.reload();
+                }
+            });
         }
 
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: { width: 250, height: 250 }, videoConstraints: { facingMode: { exact: "environment" } } }
-        );
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, videoConstraints: { facingMode: "environment" } });
         html5QrcodeScanner.render(onScanSuccess);
 
         function sendData() {
-            const amountField = document.getElementById('amount');
-            const amount = amountField.value;
-            if(!amount) return alert("請輸入金額！");
+            const val = document.getElementById('amount').value;
+            if(!val) return alert("請輸入金額");
 
             const btn = document.getElementById('send-btn');
             btn.innerText = "處理中...";
             btn.disabled = true;
 
-            const finalURL = `${scriptURL}?id=${encodeURIComponent(currentStudentId)}&amount=${amount}`;
-            
-            // 使用 no-cors 模式
-            fetch(finalURL, { method: 'GET', mode: 'no-cors' })
-            .then(() => {
-                alert("交易指令已發送！\n請檢查試算表。");
-                location.reload(); 
+            fetch(`${scriptURL}?id=${currentId}&amount=${val}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert(`交易成功！\n${data.name}\n餘額：${data.oldBalance} → ${data.newBalance}\n變動：${data.change}`);
+                    location.reload();
+                }
             })
-            .catch(err => {
-                alert("發送失敗，請檢查網路。");
-                btn.disabled = false;
-                btn.innerText = "確認送出交易";
+            .catch(() => {
+                alert("交易已發送，請檢查試算表！");
+                location.reload();
             });
         }
     </script>
