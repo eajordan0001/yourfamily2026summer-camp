@@ -51,9 +51,10 @@
             <button class="btn-small" onclick="setVal(100)">+100</button>
             <button class="btn-small" onclick="setVal(50)">+50</button>
             <button class="btn-small" onclick="setVal(10)">+10</button>
-            <button class="btn-small" onclick="setVal(-10)" style="color:var(--danger)">-10</button>
-            <button class="btn-small" onclick="setVal(-50)" style="color:var(--danger)">-50</button>
             <button class="btn-small" onclick="setVal(-100)" style="color:var(--danger)">-100</button>
+            <button class="btn-small" onclick="setVal(-50)" style="color:var(--danger)">-50</button>
+            <button class="btn-small" onclick="setVal(-10)" style="color:var(--danger)">-10</button>
+
         </div>
         
         <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認扣款/存款</button>
@@ -68,7 +69,7 @@
         function initScanner() {
             // 這裡直接自定義繁體中文標籤
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 30, // 提高 FPS 讓掃描更靈敏
+                fps: 20, // 提高 FPS 讓掃描更靈敏
                 qrbox: 250, 
                 videoConstraints: { facingMode: "environment" },
                 rememberLastUsedCamera: true // 記住相機，減少權限詢問
