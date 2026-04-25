@@ -1,54 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夏令營銀行</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>夏令營虛擬銀行</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
-        #reader { width: 300px; margin: 0 auto; background: white; }
-        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border-radius: 8px; border: none; background: #007bff; color: white; }
-        input { padding: 10px; font-size: 18px; width: 80%; margin: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            background: #f4f7f9; 
+            color: #333;
+        }
+        h2 { color: #0056b3; margin-bottom: 20px; }
+        #reader { 
+            width: 100%; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            border-radius: 12px; 
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white;
+        }
+        #result-section { 
+            margin-top: 20px; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .student-info { font-size: 20px; font-weight: bold; color: #d9534f; }
+        input[type="number"] { 
+            padding: 12px; 
+            font-size: 18px; 
+            width: 80%; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            border: 2px solid #ddd;
+            outline: none;
+        }
+        input:focus { border-color: #007bff; }
+        button { 
+            padding: 15px 40px; 
+            font-size: 18px; 
+            font-weight: bold;
+            cursor: pointer; 
+            border-radius: 50px; 
+            border: none; 
+            background: #28a745; 
+            color: white; 
+            width: 80%;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); background: #218838; }
+        .hint { font-size: 14px; color: #777; margin-top: 10px; }
     </style>
 </head>
 <body>
+
     <h2>💰 夏令營虛擬銀行</h2>
+    
     <div id="reader"></div>
-    <div id="result-section" style="display:none;">
-        <p>學員 ID: <span id="student-id"></span></p>
-        <input type="number" id="amount" placeholder="輸入金額 (正數存，負數扣)">
+    
+    <div id="result-section">
+        <p>正在為學員轉帳</p>
+        <div class="student-info" id="student-id"></div>
+        <input type="number" id="amount" placeholder="輸入金額 (例: 50 或 -20)" inputmode="decimal">
         <br>
-        <button onclick="sendData()">送出交易</button>
+        <button onclick="sendData()">確認送出交易</button>
+        <p class="hint">正數為存款，負數為扣款</p>
     </div>
 
     <script>
-        const scriptURL = "https://docs.google.com/spreadsheets/d/1-6n1Xuom3UWo2Ad1bZvPaFA3C8bghjgAj2y03MFfBRI/edit?usp=drivesdk"; // 貼上你的 Apps Script URL
+        // 🚨 重要：請在此處替換成你部署後的 Apps Script URL
+        const scriptURL = "這裡換成你的AppsScript網址"; 
+        
         let currentStudentId = "";
 
-        // 啟動掃碼器
+        // 成功掃描的回呼函式
         function onScanSuccess(decodedText) {
             currentStudentId = decodedText;
-            document.getElementById('student-id').innerText = decodedText;
+            document.getElementById('student-id').innerText = "ID: " + decodedText;
             document.getElementById('result-section').style.display = 'block';
-            alert("掃描成功：" + decodedText);
+            
+            // 手機震動反饋
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // 掃描成功後停止掃描器以節省電力
+            // html5QrcodeScanner.clear(); 
         }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        // 初始化掃描器，強制使用後置相機 (facingMode: environment)
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                videoConstraints: {
+                    facingMode: { exact: "environment" }
+                }
+            },
+            /* verbose= */ false
+        );
         html5QrcodeScanner.render(onScanSuccess);
 
-        // 送出資料到 Google Sheets
+        // 送出交易資料
         function sendData() {
-            const amount = document.getElementById('amount').value;
-            if(!amount) return alert("請輸入金額");
+            const amountField = document.getElementById('amount');
+            const amount = amountField.value;
             
+            if(!amount) {
+                alert("請輸入金額！");
+                return;
+            }
+
+            // 顯示處理中狀態
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "傳送中...";
+            btn.disabled = true;
+
             const finalURL = `${scriptURL}?id=${currentStudentId}&amount=${amount}`;
             
-            fetch(finalURL, { method: 'GET', mode: 'no-cors' }) // 使用 no-cors 模式避開跨網域問題
+            // 使用 no-cors 模式發送請求
+            fetch(finalURL, { method: 'GET', mode: 'no-cors' })
             .then(() => {
-                alert("指令已送出，請至試算表確認餘額！");
-                location.reload(); // 重新整理畫面
+                alert("交易成功！\n學員：" + currentStudentId + "\n金額：" + amount);
+                // 重置介面
+                amountField.value = "";
+                document.getElementById('result-section').style.display = 'none';
+                btn.innerText = originalText;
+                btn.disabled = false;
             })
-            .catch(err => alert("失敗：" + err));
+            .catch(err => {
+                alert("網路傳輸可能稍有延遲，請檢查試算表是否更新。");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
         }
     </script>
 </body>
