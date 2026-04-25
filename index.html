@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夏令營銀行</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
+        #reader { width: 300px; margin: 0 auto; background: white; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border-radius: 8px; border: none; background: #007bff; color: white; }
+        input { padding: 10px; font-size: 18px; width: 80%; margin: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h2>💰 夏令營虛擬銀行</h2>
+    <div id="reader"></div>
+    <div id="result-section" style="display:none;">
+        <p>學員 ID: <span id="student-id"></span></p>
+        <input type="number" id="amount" placeholder="輸入金額 (正數存，負數扣)">
+        <br>
+        <button onclick="sendData()">送出交易</button>
+    </div>
+
+    <script>
+        const scriptURL = "你的AppsScript網址"; // 貼上你的 Apps Script URL
+        let currentStudentId = "";
+
+        // 啟動掃碼器
+        function onScanSuccess(decodedText) {
+            currentStudentId = decodedText;
+            document.getElementById('student-id').innerText = decodedText;
+            document.getElementById('result-section').style.display = 'block';
+            alert("掃描成功：" + decodedText);
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+
+        // 送出資料到 Google Sheets
+        function sendData() {
+            const amount = document.getElementById('amount').value;
+            if(!amount) return alert("請輸入金額");
+            
+            const finalURL = `${scriptURL}?id=${currentStudentId}&amount=${amount}`;
+            
+            fetch(finalURL, { method: 'GET', mode: 'no-cors' }) // 使用 no-cors 模式避開跨網域問題
+            .then(() => {
+                alert("指令已送出，請至試算表確認餘額！");
+                location.reload(); // 重新整理畫面
+            })
+            .catch(err => alert("失敗：" + err));
+        }
+    </script>
+</body>
+</html>
