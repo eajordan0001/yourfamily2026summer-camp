@@ -3,111 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>優兒夏令營虛擬銀行</title>
+    <title>夏令營行動銀行 Pro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; text-align: center; padding: 20px; background: #f4f7f9; color: #333; }
-        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        #result-section { margin-top: 20px; padding: 20px; background: white; border-radius: 12px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .info-box { background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .highlight { font-weight: bold; color: #0056b3; font-size: 24px; display: block; margin-top: 5px; }
-        input[type="number"] { padding: 15px; font-size: 20px; width: 85%; margin: 10px 0; border-radius: 8px; border: 2px solid #ddd; outline: none; }
-        button { padding: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; width: 90%; margin: 10px 0; }
-        .btn-confirm { background: #28a745; color: white; }
-        .btn-cancel { background: #6c757d; color: white; }
-        .loading-text { color: #888; font-style: italic; }
+        :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; }
+        body { font-family: -apple-system, sans-serif; text-align: center; padding: 15px; background: #f0f2f5; color: #333; margin: 0; }
+        h2 { margin: 15px 0; color: #1a1a1a; font-size: 24px; }
+        
+        #reader { width: 100%; max-width: 450px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; }
+        
+        #result-section { margin-top: 15px; padding: 20px; background: white; border-radius: 20px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .info-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; }
+        .label { font-size: 14px; color: #666; display: block; }
+        .name { font-size: 26px; font-weight: bold; color: var(--primary); }
+        .balance { font-size: 32px; font-weight: 900; color: #333; }
+        .balance.minus { color: var(--danger); }
+
+        input[type="number"] { padding: 15px; font-size: 24px; width: 80%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; }
+        
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .btn-small { padding: 12px; font-size: 16px; background: #eee; border-radius: 8px; border: none; font-weight: bold; }
+        
+        button.main { padding: 18px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
+        .btn-confirm { background: var(--success); color: white; }
+        .btn-cancel { background: var(--gray); color: white; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <h2>💰 優兒夏令營虛擬銀行</h2>
+    <h2>💰 夏令營行動銀行</h2>
     
     <div id="reader"></div>
     
     <div id="result-section">
         <div class="info-box">
-            學員姓名：<span id="display-name" class="highlight">讀取中...</span>
-            目前餘額：<span id="display-balance" class="highlight">---</span>
+            <span class="label">學員姓名</span>
+            <span id="display-name" class="name">讀取中...</span>
+            <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
+            <span class="label">目前餘額</span>
+            <span id="display-balance" class="balance">---</span>
         </div>
         
-        <input type="number" id="amount" placeholder="輸入變動金額 (如: -20)" inputmode="decimal">
+        <input type="number" id="amount" placeholder="0" inputmode="decimal">
         
-        <button id="send-btn" class="btn-confirm" onclick="sendData()">確認交易</button>
-        <button class="btn-cancel" onclick="location.reload()">取消並重新掃描</button>
+        <div class="btn-grid">
+            <button class="btn-small" onclick="setVal(100)">+100</button>
+            <button class="btn-small" onclick="setVal(50)">+50</button>
+            <button class="btn-small" onclick="setVal(10)">+10</button>
+            <button class="btn-small" onclick="setVal(-20)" style="color:var(--danger)">-20</button>
+            <button class="btn-small" onclick="setVal(-50)" style="color:var(--danger)">-50</button>
+            <button class="btn-small" onclick="setVal(-100)" style="color:var(--danger)">-100</button>
+        </div>
+        
+        <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認扣款/存款</button>
+        <button class="main btn-cancel" onclick="location.reload()">取消 / 下一位</button>
     </div>
 
     <script>
-        // 🚨 這裡請貼入你正確的 Apps Script URL (以 /exec 結尾)
-        const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
-        
+        const scriptURL = "這裡換成你的EXEC網址"; 
         let currentId = "";
         let html5QrcodeScanner;
 
-        // 啟動掃描
-        function startScanner() {
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", 
-                { fps: 10, qrbox: 250, videoConstraints: { facingMode: "environment" } }
-            );
+        function initScanner() {
+            // 這裡直接自定義繁體中文標籤
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                fps: 20, // 提高 FPS 讓掃描更靈敏
+                qrbox: 250, 
+                videoConstraints: { facingMode: "environment" },
+                rememberLastUsedCamera: true // 記住相機，減少權限詢問
+            });
+            
             html5QrcodeScanner.render(onScanSuccess);
+            
+            // 強制改寫套件內的按鈕文字為繁體中文
+            setTimeout(() => {
+                const btn = document.getElementById('html5-qrcode-button-camera-permission');
+                if(btn) btn.innerText = "允許使用相機";
+                const startBtn = document.getElementById('html5-qrcode-button-camera-start');
+                if(startBtn) startBtn.innerText = "開始掃描";
+                const stopBtn = document.getElementById('html5-qrcode-button-camera-stop');
+                if(stopBtn) stopBtn.innerText = "停止掃描";
+            }, 300);
         }
 
-        // 掃描成功後的動作
         function onScanSuccess(decodedText) {
             currentId = decodedText.trim();
             document.getElementById('reader').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            
-            // 立即停止相機
-            html5QrcodeScanner.clear().catch(e => console.error(e));
+            if (navigator.vibrate) navigator.vibrate(70);
+            html5QrcodeScanner.clear();
 
-            // 向後端查詢資料
+            // 快速查詢
             fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "info") {
                     document.getElementById('display-name').innerText = data.name;
-                    document.getElementById('display-balance').innerText = data.balance;
-                } else {
-                    alert("查詢失敗：" + (data.message || "未知錯誤"));
-                    location.reload();
+                    const balEl = document.getElementById('display-balance');
+                    balEl.innerText = data.balance;
+                    balEl.classList.toggle('minus', data.balance < 0);
                 }
             })
-            .catch(err => {
-                alert("無法連線至試算表，請確認網路或 Apps Script 部署設定！");
-                console.error(err);
-            });
+            .catch(() => { document.getElementById('display-name').innerText = "讀取失敗"; });
         }
 
-        // 送出交易
+        function setVal(v) { document.getElementById('amount').value = v; }
+
         function sendData() {
             const amountVal = document.getElementById('amount').value;
-            if(!amountVal || amountVal == 0) return alert("請輸入有效的變動金額！");
+            if(!amountVal) return alert("請輸入金額");
 
             const btn = document.getElementById('send-btn');
-            btn.innerText = "處理中...";
+            btn.innerText = "傳送中...";
             btn.disabled = true;
 
             fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=${amountVal}`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 交易完成！\n學員：${data.name}\n變動：${data.change}\n新餘額：${data.newBalance}`);
+                    alert(`✅ 交易完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
                     location.reload();
-                } else {
-                    alert("❌ 交易失敗：" + data.message);
-                    btn.disabled = false;
-                    btn.innerText = "確認交易";
                 }
             })
-            .catch(err => {
-                alert("系統回傳延遲，請手動確認試算表數字。");
-                location.reload();
-            });
+            .catch(() => { alert("已發送，請檢查試算表！"); location.reload(); });
         }
 
-        // 初始化
-        startScanner();
+        initScanner();
     </script>
 </body>
 </html>
