@@ -10,48 +10,37 @@
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 15px; background: #f0f2f5; color: #333; margin: 0; }
         h2 { margin: 15px 0; color: #1a1a1a; font-size: 24px; }
         
-        /* 掃描區域外框 */
+        /* 掃描區域優化 */
         #reader { width: 100%; max-width: 450px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; border: none !important; }
         
-        /* 強制放大「允許使用相機」按鈕 (紅框處) */
-        #html5-qrcode-button-camera-permission {
-            padding: 18px 36px !important;
-            font-size: 20px !important;
-            font-weight: bold !important;
-            background-color: var(--primary) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 50px !important;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.4) !important;
-            cursor: pointer !important;
-            margin: 25px 0 !important;
-        }
-
-        /* 隱藏黃框內的「Scan an Image File」與多餘圖示 */
+        /* 隱藏紅框字樣、黃框切換按鈕、以及多餘提示 */
+        #reader__dashboard_section_csr > div > span:first-child,
+        #reader__camera_selection,
         #reader__dashboard_section_csr > div > span:last-child,
-        #reader img[alt="Info icon"], 
-        #reader img[alt="Camera icon"] {
-            display: none !important;
+        #reader img { display: none !important; }
+
+        /* 放大並置中 Start/Stop 按鈕 */
+        #html5-qrcode-button-camera-start, #html5-qrcode-button-camera-stop {
+            padding: 15px 30px !important; font-size: 18px !important; border-radius: 50px !important; margin: 10px auto !important; display: block !important;
         }
 
         /* 結果顯示區域 */
         #result-section { margin-top: 15px; padding: 20px; background: white; border-radius: 20px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
         .info-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; }
-        .label { font-size: 14px; color: #666; display: block; }
         .name { font-size: 26px; font-weight: bold; color: var(--primary); }
-        .balance { font-size: 32px; font-weight: 900; color: #333; }
-        .balance.minus { color: var(--danger); }
+        .balance { font-size: 32px; font-weight: 900; }
 
-        input[type="number"] { padding: 15px; font-size: 24px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; }
+        /* 輸入框與按鈕 */
+        input[type="number"] { padding: 15px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; }
         
-        /* 快捷按鈕網格 */
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .btn-small { padding: 12px; font-size: 16px; background: #eee; border-radius: 8px; border: none; font-weight: bold; }
+        .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .btn-small { padding: 12px; font-size: 16px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
+        .btn-category { background: #e9ecef; color: #495057; border: none; }
         
-        button.main { padding: 18px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
+        button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
-        .btn-cancel { background: var(--gray); color: white; margin-top: 15px; }
+        .btn-cancel { background: var(--gray); color: white; }
     </style>
 </head>
 <body>
@@ -62,30 +51,48 @@
     
     <div id="result-section">
         <div class="info-box">
-            <span class="label">學員姓名</span>
-            <span id="display-name" class="name">讀取中...</span>
-            <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
-            <span class="label">目前餘額</span>
+            <span class="name" id="display-name">讀取中...</span><br>
+            <span style="font-size: 14px; color: #666;">目前餘額：</span>
             <span id="display-balance" class="balance">---</span>
         </div>
         
-        <input type="number" id="amount" placeholder="輸入金額" inputmode="decimal">
+        <input type="number" id="amount" value="0" readonly>
         
+        <div class="section-title">快速加總金額 (可重複點擊)</div>
         <div class="btn-grid">
-            <button class="btn-small" onclick="setVal(100)">+100</button>
-            <button class="btn-small" onclick="setVal(50)">+50</button>
-            <button class="btn-small" onclick="setVal(10)">+10</button>
-            <button class="btn-small" onclick="setVal(-20)" style="color:var(--danger)">-20</button>
-            <button class="btn-small" onclick="setVal(-50)" style="color:var(--danger)">-50</button>
-            <button class="btn-small" onclick="setVal(-100)" style="color:var(--danger)">-100</button>
+            <button class="btn-small" onclick="addVal(100)" style="color:var(--success)">+100</button>
+            <button class="btn-small" onclick="addVal(50)" style="color:var(--success)">+50</button>
+            <button class="btn-small" onclick="addVal(10)" style="color:var(--success)">+10</button>
+            <button class="btn-small" onclick="addVal(5)" style="color:var(--success)">+5</button>
+            <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-100</button>
+            <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
+            <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-10</button>
+            <button class="btn-small" onclick="addVal(-5)" style="color:var(--success)">-5</button>
         </div>
+
+        <div class="section-title">交易項目紀錄 (Logs 分類)</div>
+        <div class="btn-grid">
+            <button class="btn-small btn-category" onclick="setNote('餅乾')">🍪 餅乾</button>
+            <button class="btn-small btn-category" onclick="setNote('飲料')">🧃 飲料</button>
+            <button class="btn-small btn-category" onclick="setNote('預留3')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留4')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留5')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留6')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留7')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留8')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留9')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留10')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留11')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留12')">預留</button>
+        </div>
+        <input type="hidden" id="note" value="一般交易">
         
         <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認交易</button>
         <button class="main btn-cancel" onclick="location.reload()">取消 / 下一位</button>
     </div>
 
     <script>
-        // 🚨 這裡請貼入你正確的 Apps Script URL
+        // 🚨 這裡請貼入你的 Apps Script EXEC 網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         
         let currentId = "";
@@ -93,24 +100,12 @@
 
         function initScanner() {
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 20, 
-                qrbox: 250, 
+                fps: 20, qrbox: 250, 
                 videoConstraints: { facingMode: "environment" },
                 rememberLastUsedCamera: true,
-                // 徹底禁用檔案掃描功能
                 supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
             });
-            
             html5QrcodeScanner.render(onScanSuccess);
-            
-            // 每隔 100 毫秒檢查一次按鈕是否出現，確保文字翻譯成功
-            const translateTimer = setInterval(() => {
-                const btn = document.getElementById('html5-qrcode-button-camera-permission');
-                if(btn) {
-                    btn.innerText = "點擊開啟相機";
-                    clearInterval(translateTimer);
-                }
-            }, 100);
         }
 
         function onScanSuccess(decodedText) {
@@ -118,54 +113,51 @@
             document.getElementById('reader').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
             if (navigator.vibrate) navigator.vibrate(70);
-            html5QrcodeScanner.clear().catch(e => console.error(e));
+            html5QrcodeScanner.clear();
 
-            // 執行背景查詢
             fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "info") {
                     document.getElementById('display-name').innerText = data.name;
-                    const balEl = document.getElementById('display-balance');
-                    balEl.innerText = data.balance;
-                    balEl.classList.toggle('minus', data.balance < 0);
-                } else {
-                    alert("找不到該 ID 資料");
-                    location.reload();
+                    document.getElementById('display-balance').innerText = data.balance;
                 }
-            })
-            .catch(() => { document.getElementById('display-name').innerText = "讀取失敗"; });
-        }
-
-        function setVal(v) { document.getElementById('amount').value = v; }
-
-        function sendData() {
-            const amountVal = document.getElementById('amount').value;
-            if(!amountVal || amountVal == 0) return alert("請輸入有效金額");
-
-            const btn = document.getElementById('send-btn');
-            btn.innerText = "傳送中...";
-            btn.disabled = true;
-
-            fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=${amountVal}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    alert(`✅ 交易完成！\n學員：${data.name}\n變動：${data.change}\n新餘額：${data.newBalance}`);
-                    location.reload();
-                } else {
-                    alert("交易失敗：" + data.message);
-                    btn.innerText = "確認交易";
-                    btn.disabled = false;
-                }
-            })
-            .catch(() => { 
-                alert("已完成指令發送，請檢查試算表！"); 
-                location.reload(); 
             });
         }
 
-        // 啟動
+        // 🌟 金額連續加總邏輯
+        function addVal(v) {
+            let input = document.getElementById('amount');
+            input.value = parseInt(input.value || 0) + v;
+        }
+
+        // 🌟 設定分類備註
+        function setNote(n) {
+            document.getElementById('note').value = n;
+            // 讓按鈕視覺上有回饋
+            alert("已選擇分類：" + n);
+        }
+
+        function sendData() {
+            const amountVal = document.getElementById('amount').value;
+            const noteVal = document.getElementById('note').value;
+            if(amountVal == 0) return alert("金額不能為 0");
+
+            const btn = document.getElementById('send-btn');
+            btn.innerText = "傳送中..."; btn.disabled = true;
+
+            // 將備註也傳送到後端
+            fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert(`✅ 成功！\n${data.name} (${noteVal})\n新餘額：${data.newBalance}`);
+                    location.reload();
+                }
+            })
+            .catch(() => location.reload());
+        }
+
         initScanner();
     </script>
 </body>
