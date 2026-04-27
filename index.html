@@ -8,33 +8,74 @@
     <style>
         :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; --light-gray: #e9ecef; }
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 10px; background: #f0f2f5; margin: 0; overflow-x: hidden; }
-        
-        /* 掃描區域優化：增加一個掃描線特效，增加「運作中」的感覺 */
-        #reader-container { width: 90%; max-width: 400px; margin: 20px auto; position: relative; }
+        h2 { margin: 15px 0; color: #1a1a1a; font-size: 22px; }
+
+        /* 掃描容器 */
+        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; position: relative; }
         #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; border: 4px solid white !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        
-        /* 隱藏套件內建按鈕 */
-        #reader__dashboard_section_csr, #reader__camera_selection { display: none !important; }
+        #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
 
-        /* 結果頁面：預設完全消失並脫離文檔流 */
-        #result-section { display: none; padding: 20px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; }
-        
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .name { font-size: 28px; font-weight: bold; color: var(--primary); }
-        .balance { font-size: 36px; font-weight: 900; }
+        /* 交易介面 */
+        #result-section { display: none; padding: 15px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        input[type="number"] { padding: 10px; font-size: 32px; width: 80%; margin: 10px 0; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-weight: bold; }
+        .info-box { background: #f8f9fa; padding: 12px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #eee; }
+        .name { font-size: 26px; font-weight: bold; color: var(--primary); margin-bottom: 2px; }
+        .balance { font-size: 34px; font-weight: 900; color: #333; }
+        .id-badge { font-size: 11px; color: #aaa; margin-bottom: 5px; }
+
+        /* 黑框區：手動輸入框優化 */
+        .input-wrapper { margin: 10px 0; }
+        input[type="number"] { 
+            padding: 12px; 
+            font-size: 36px; 
+            width: 85%; 
+            border-radius: 15px; 
+            border: 2px solid var(--primary); 
+            text-align: center; 
+            font-weight: bold; 
+            background: #fff;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            outline: none;
+        }
         
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
-        .btn-small { padding: 15px 5px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 10px; font-weight: bold; }
-        .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; }
-        .btn-category.active { background: var(--primary) !important; color: white !important; }
+        .section-title { text-align: left; font-size: 13px; color: #777; margin: 10px 0 5px 8px; font-weight: bold; }
+
+        /* 紅框區：2列4欄佈局 */
+        .btn-grid-8 { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px; 
+            margin-bottom: 15px; 
+        }
         
-        button.main { padding: 20px; font-size: 22px; font-weight: bold; border-radius: 18px; border: none; width: 100%; margin-top: 10px; }
+        /* 交易分類佈局 */
+        .btn-grid-3 { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            margin-bottom: 15px; 
+        }
+
+        .btn-small { 
+            padding: 12px 2px; 
+            font-size: 16px; 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            transition: 0.1s;
+        }
+        .btn-small:active { background: #eee; transform: scale(0.92); }
+        
+        .btn-category { background: var(--light-gray); color: #444; border: 2px solid transparent; font-size: 14px; }
+        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; }
+        
+        button.main { padding: 18px; font-size: 22px; font-weight: bold; border-radius: 18px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-confirm { background: var(--success); color: white; }
-        .btn-cancel { background: var(--gray); color: white; margin-top: 15px; }
+        .btn-cancel { background: var(--gray); color: white; margin-top: 10px; font-size: 16px; padding: 12px; }
 
-        #start-btn { padding: 20px 50px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; margin: 60px auto; display: block; }
+        #start-btn { padding: 20px 50px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 60px auto; display: block; }
     </style>
 </head>
 <body>
@@ -43,100 +84,96 @@
     
     <div id="reader-container">
         <div id="reader"></div>
-        <button id="start-btn" onclick="requestPermission()">開啟鏡頭</button>
+        <button id="start-btn" onclick="requestPermission()">啟動鏡頭</button>
     </div>
     
     <div id="result-section">
         <div class="info-box">
             <div id="display-name" class="name">載入中...</div>
-            <div style="font-size: 12px; color: #999;">ID: <span id="display-id">---</span></div>
-            <div style="font-size: 14px; color: #666; margin-top: 10px;">目前餘額</div>
+            <div class="id-badge">學員 ID: <span id="display-id">---</span></div>
+            <div style="font-size: 13px; color: #888;">目前餘額</div>
             <div id="display-balance" class="balance">---</div>
         </div>
         
-        <input type="number" id="amount" value="0" readonly>
+        <div class="input-wrapper">
+            <input type="number" id="amount" value="0" placeholder="0" pattern="[0-9-]*">
+        </div>
         
-        <div class="btn-grid">
+        <div class="section-title">快速金額增減</div>
+        <div class="btn-grid-8">
+            <button class="btn-small" onclick="addVal(1)" style="color:var(--success)">+1</button>
             <button class="btn-small" onclick="addVal(5)" style="color:var(--success)">+5</button>
             <button class="btn-small" onclick="addVal(10)" style="color:var(--success)">+10</button>
             <button class="btn-small" onclick="addVal(50)" style="color:var(--success)">+50</button>
+            <button class="btn-small" onclick="addVal(-1)" style="color:var(--danger)">-1</button>
             <button class="btn-small" onclick="addVal(-5)" style="color:var(--danger)">-5</button>
             <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-10</button>
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
-        <div class="btn-grid">
+        <div class="section-title">交易項目</div>
+        <div class="btn-grid-3">
             <button class="btn-small btn-category" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
             <button class="btn-small btn-category" onclick="setNote(this, '飲料')">🧃 飲料</button>
             <button class="btn-small btn-category" onclick="setNote(this, '其他')">❓ 其他</button>
         </div>
         <input type="hidden" id="note" value="一般交易">
         
-        <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認扣款/加值</button>
-        <button class="main btn-cancel" onclick="location.reload()">放棄並重掃</button>
+        <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認交易</button>
+        <button class="main btn-cancel" onclick="resumeScanner()">取消並重掃</button>
     </div>
 
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
         let html5QrCode;
         let globalId = ""; 
+        let isPaused = false;
 
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
-            startBtn.disabled = true;
-            html5QrCode = new Html5Qrcode("reader");
-            
-            // 🚀 優化點：縮小掃描計算區（qrbox），讓手機不用計算全螢幕影像，解碼會變快
-            const config = { 
-                fps: 20, 
-                qrbox: { width: 220, height: 220 }, 
-                aspectRatio: 1.0 
-            };
-
+            if(startBtn) startBtn.style.display = 'none';
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .then(() => { startBtn.style.display = 'none'; })
-            .catch(() => { location.reload(); });
+            .catch(() => { if(startBtn) startBtn.style.display = 'block'; });
         }
 
-        // 🚀 關鍵修改：先換頁，完全不准等待
         function onScanSuccess(decodedText) {
-            // A. 第一時間震動並切換介面
+            if (isPaused) return;
+            isPaused = true;
             if (navigator.vibrate) navigator.vibrate(80);
             globalId = decodedText.trim();
 
-            // 隱藏所有掃描相關標籤
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('main-title').style.display = 'none';
-            // 顯示結果頁
             document.getElementById('result-section').style.display = 'block';
+            
             document.getElementById('display-id').innerText = globalId;
+            document.getElementById('display-name').innerText = "讀取中...";
+            document.getElementById('amount').value = 0;
 
-            // B. 異步關閉相機 (不阻礙上面的換頁)
-            setTimeout(() => {
-                if(html5QrCode) {
-                    html5QrCode.stop().catch(e => console.log("Stop failed, ignore."));
-                }
-            }, 50);
-
-            // C. 請求資料
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
-                if(data.name) {
-                    document.getElementById('display-name').innerText = data.name;
-                    document.getElementById('display-balance').innerText = data.balance;
-                } else {
-                    document.getElementById('display-name').innerText = "非系統學員";
-                }
-            })
-            .catch(() => {
-                document.getElementById('display-name').innerText = "網路異常";
+                document.getElementById('display-name').innerText = data.name || "查無此人";
+                document.getElementById('display-balance').innerText = data.balance ?? "---";
             });
         }
 
+        function resumeScanner() {
+            isPaused = false;
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('reader-container').style.display = 'block';
+            document.getElementById('main-title').style.display = 'block';
+        }
+
+        // 金額增減邏輯
         function addVal(v) {
             const input = document.getElementById('amount');
-            input.value = parseInt(input.value || 0) + v;
+            // 確保原本沒數字時也能計算
+            let current = parseInt(input.value);
+            if (isNaN(current)) current = 0;
+            input.value = current + v;
         }
 
         function setNote(btn, n) {
@@ -148,22 +185,28 @@
         function sendData() {
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
-            if(amountVal == 0) return alert("請輸入金額");
+            
+            if(amountVal == 0 || amountVal == "") return alert("請輸入或點選金額");
+
             const btn = document.getElementById('send-btn');
-            btn.innerText = "寫入中..."; btn.disabled = true;
+            btn.innerText = "寫入資料中..."; btn.disabled = true;
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 交易成功！\n餘額：${data.newBalance}`);
-                    location.reload();
+                    alert(`✅ 成功！\n餘額變動：${amountVal}\n剩餘金額：${data.newBalance}`);
+                    btn.innerText = "確認交易"; btn.disabled = false;
+                    resumeScanner();
                 } else {
                     alert("失敗：" + data.message);
-                    btn.disabled = false; btn.innerText = "確認扣款/加值";
+                    btn.innerText = "確認交易"; btn.disabled = false;
                 }
             })
-            .catch(() => { alert("伺服器連線失敗"); location.reload(); });
+            .catch(() => {
+                alert("網路異常，請再試一次");
+                btn.innerText = "確認交易"; btn.disabled = false;
+            });
         }
     </script>
 </body>
