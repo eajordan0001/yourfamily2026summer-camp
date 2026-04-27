@@ -32,7 +32,7 @@
         .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; }
 
-        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; box-shadow: 0 4px 15px rgba(0,123,255,0.4); }
+        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; }
     </style>
 </head>
 <body>
@@ -55,9 +55,9 @@
         
         <div class="section-title">快速金額加總</div>
         <div class="btn-grid">
-            <button class="btn-small" onclick="addVal(50)">+50</button>
-            <button class="btn-small" onclick="addVal(10)">+10</button>
-            <button class="btn-small" onclick="addVal(5)">+5</button>
+            <button class="btn-small" onclick="addVal(100)">+50</button>
+            <button class="btn-small" onclick="addVal(50)">+10</button>
+            <button class="btn-small" onclick="addVal(10)">+5</button>
             <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-50</button>
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-10</button>
             <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-5</button>
@@ -81,18 +81,22 @@
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         let html5QrCode;
-        let globalId = ""; // 儲存掃描到的 ID
+        let globalId = ""; 
 
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
-            startBtn.innerText = "相機啟動中...";
             startBtn.disabled = true;
+            startBtn.innerText = "相機啟動中...";
 
+            // 確保每次啟動都是乾淨的執行個體
+            if (html5QrCode) {
+                html5QrCode.clear();
+            }
             html5QrCode = new Html5Qrcode("reader");
             
             const config = { 
-                fps: 20, 
-                qrbox: { width: 200, height: 200 }
+                fps: 10, 
+                qrbox: { width: 250, height: 250 }
             };
 
             html5QrCode.start(
@@ -102,38 +106,40 @@
             ).then(() => {
                 startBtn.style.display = 'none';
             }).catch(err => {
-                alert("相機開啟失敗，請確認已使用 HTTPS 網址並允許權限。");
-                startBtn.innerText = "開啟相機掃描";
+                alert("相機開啟失敗：請確保使用 HTTPS 並授權相機權限。");
                 startBtn.disabled = false;
+                startBtn.innerText = "開啟相機掃描";
             });
         }
 
-        async function onScanSuccess(decodedText) {
+        function onScanSuccess(decodedText) {
+            // 1. 立即儲存 ID 並震動
             globalId = decodedText.trim();
             if (navigator.vibrate) navigator.vibrate(100);
             
-            try {
-                // 1. 先停止相機
-                await html5QrCode.stop();
-                
-                // 2. 切換介面
-                document.getElementById('reader-container').style.display = 'none';
-                document.getElementById('result-section').style.display = 'block';
-                
-                // 3. 查詢資料
-                const response = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`);
-                const data = await response.json();
-                
-                if(data.status === "info" || data.status === "success") {
+            // 2. 立即切換 UI 隱藏相機，讓使用者感覺「掃到了」
+            document.getElementById('reader-container').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+
+            // 3. 背景慢慢停止相機，不擋住 UI 切換
+            html5QrCode.stop().catch(err => console.log("Stop failed", err));
+
+            // 4. 發送查詢請求
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.name) {
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
                 } else {
-                    alert("找不到該學員資料");
+                    alert("查無此學員！");
                     location.reload();
                 }
-            } catch (err) {
-                console.error("處理掃描結果出錯:", err);
-            }
+            })
+            .catch(err => {
+                console.error("API Error", err);
+                alert("資料讀取失敗，請確認網路或後台設定。");
+            });
         }
 
         function addVal(v) {
@@ -146,32 +152,33 @@
             alert("分類已選擇：" + n);
         }
 
-        async function sendData() {
+        function sendData() {
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
             
             if(amountVal == 0) return alert("金額不能為 0");
-            if(!globalId) return alert("錯誤：遺失學員 ID，請重新掃描");
+            if(!globalId) return alert("遺失學員 ID，請重新掃描");
 
             const btn = document.getElementById('send-btn');
-            btn.innerText = "傳送中..."; btn.disabled = true;
+            btn.innerText = "傳送中..."; 
+            btn.disabled = true;
 
-            try {
-                const response = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`);
-                const data = await response.json();
-                
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
+            .then(res => res.json())
+            .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 成功！\n${data.name}\n變動：${amountVal}\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易成功！\n學員：${data.name}\n餘額：${data.newBalance}`);
                     location.reload();
                 } else {
                     alert("交易失敗：" + data.message);
-                    btn.innerText = "確認交易";
                     btn.disabled = false;
+                    btn.innerText = "確認交易";
                 }
-            } catch (err) {
-                alert("網路連線錯誤，請檢查後台");
+            })
+            .catch(err => {
+                alert("連線失敗，請檢查後台");
                 location.reload();
-            }
+            });
         }
     </script>
 </body>
