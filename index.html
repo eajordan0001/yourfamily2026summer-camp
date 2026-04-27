@@ -7,44 +7,39 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; --light-gray: #e9ecef; }
-        body { font-family: -apple-system, sans-serif; text-align: center; padding: 10px; background: #f0f2f5; margin: 0; }
-        h2 { margin: 15px 0; color: #1a1a1a; }
+        body { font-family: -apple-system, sans-serif; text-align: center; padding: 10px; background: #f0f2f5; margin: 0; overflow-x: hidden; }
         
-        /* 1. 相機優化：改為圓角大區域 */
-        #reader-container { width: 95%; max-width: 500px; margin: 0 auto; position: relative; }
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: #000; border: none !important; }
+        /* 掃描區域優化：增加一個掃描線特效，增加「運作中」的感覺 */
+        #reader-container { width: 90%; max-width: 400px; margin: 20px auto; position: relative; }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; border: 4px solid white !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         
-        /* 隱藏套件雜訊 */
-        #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
+        /* 隱藏套件內建按鈕 */
+        #reader__dashboard_section_csr, #reader__camera_selection { display: none !important; }
 
-        /* 2. 結果頁面 */
-        #result-section { margin-top: 10px; padding: 20px; background: white; border-radius: 25px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        /* 結果頁面：預設完全消失並脫離文檔流 */
+        #result-section { display: none; padding: 20px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; }
+        
+        .info-box { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
         .name { font-size: 28px; font-weight: bold; color: var(--primary); }
-        .balance { font-size: 36px; font-weight: 900; color: #000; }
-        .id-badge { font-size: 13px; color: #aaa; margin-top: 5px; }
+        .balance { font-size: 36px; font-weight: 900; }
 
-        input[type="number"] { padding: 12px; font-size: 32px; width: 80%; margin: 10px 0; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-weight: bold; outline: none; }
+        input[type="number"] { padding: 10px; font-size: 32px; width: 80%; margin: 10px 0; border-radius: 15px; border: 2px solid #ddd; text-align: center; font-weight: bold; }
         
-        .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
         .btn-small { padding: 15px 5px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 10px; font-weight: bold; }
-        
         .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; }
-        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; }
+        .btn-category.active { background: var(--primary) !important; color: white !important; }
         
         button.main { padding: 20px; font-size: 22px; font-weight: bold; border-radius: 18px; border: none; width: 100%; margin-top: 10px; }
-        .btn-confirm { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(40,167,69,0.3); }
-        .btn-cancel { background: var(--gray); color: white; margin-top: 20px; }
+        .btn-confirm { background: var(--success); color: white; }
+        .btn-cancel { background: var(--gray); color: white; margin-top: 15px; }
 
-        #start-btn { padding: 20px 50px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 60px auto; display: block; box-shadow: 0 5px 20px rgba(0,123,255,0.4); }
+        #start-btn { padding: 20px 50px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; margin: 60px auto; display: block; }
     </style>
 </head>
 <body>
 
-    <h2>💰 優兒夏令營行動銀行</h2>
+    <h2 id="main-title">💰 優兒夏令營行動銀行</h2>
     
     <div id="reader-container">
         <div id="reader"></div>
@@ -54,14 +49,13 @@
     <div id="result-section">
         <div class="info-box">
             <div id="display-name" class="name">載入中...</div>
-            <div class="id-badge">掃描內容: <span id="display-id">---</span></div>
+            <div style="font-size: 12px; color: #999;">ID: <span id="display-id">---</span></div>
             <div style="font-size: 14px; color: #666; margin-top: 10px;">目前餘額</div>
             <div id="display-balance" class="balance">---</div>
         </div>
         
         <input type="number" id="amount" value="0" readonly>
         
-        <div class="section-title">金額快速操作</div>
         <div class="btn-grid">
             <button class="btn-small" onclick="addVal(5)" style="color:var(--success)">+5</button>
             <button class="btn-small" onclick="addVal(10)" style="color:var(--success)">+10</button>
@@ -71,19 +65,15 @@
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
-        <div class="section-title">分類 (點選變藍色)</div>
         <div class="btn-grid">
             <button class="btn-small btn-category" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
             <button class="btn-small btn-category" onclick="setNote(this, '飲料')">🧃 飲料</button>
             <button class="btn-small btn-category" onclick="setNote(this, '其他')">❓ 其他</button>
-            <button class="btn-small btn-category" onclick="setNote(this, '預留1')">預留1</button>
-            <button class="btn-small btn-category" onclick="setNote(this, '預留2')">預留2</button>
-            <button class="btn-small btn-category" onclick="setNote(this, '預留3')">預留3</button>
         </div>
         <input type="hidden" id="note" value="一般交易">
         
         <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認扣款/加值</button>
-        <button class="main btn-cancel" onclick="location.reload()">放棄並返回</button>
+        <button class="main btn-cancel" onclick="location.reload()">放棄並重掃</button>
     </div>
 
     <script>
@@ -96,12 +86,11 @@
             startBtn.disabled = true;
             html5QrCode = new Html5Qrcode("reader");
             
-            // 🚀 關鍵優化：不設 qrbox (全螢幕掃描)，fps 設最高
+            // 🚀 優化點：縮小掃描計算區（qrbox），讓手機不用計算全螢幕影像，解碼會變快
             const config = { 
-                fps: 35, 
-                aspectRatio: 1.0,
-                videoConstraints: { facingMode: "environment" },
-                rememberLastUsedCamera: true
+                fps: 20, 
+                qrbox: { width: 220, height: 220 }, 
+                aspectRatio: 1.0 
             };
 
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
@@ -109,20 +98,27 @@
             .catch(() => { location.reload(); });
         }
 
-        // 🚀 核心優化：毫秒級跳轉
+        // 🚀 關鍵修改：先換頁，完全不准等待
         function onScanSuccess(decodedText) {
-            globalId = decodedText.trim();
+            // A. 第一時間震動並切換介面
             if (navigator.vibrate) navigator.vibrate(80);
-            
-            // 1. 立即停止相機並隱藏 (防止重複觸發)
-            if(html5QrCode) html5QrCode.stop().catch(()=>{});
-            
-            // 2. 瞬間顯示下一頁
+            globalId = decodedText.trim();
+
+            // 隱藏所有掃描相關標籤
             document.getElementById('reader-container').style.display = 'none';
+            document.getElementById('main-title').style.display = 'none';
+            // 顯示結果頁
             document.getElementById('result-section').style.display = 'block';
             document.getElementById('display-id').innerText = globalId;
 
-            // 3. 背景開始讀取資料
+            // B. 異步關閉相機 (不阻礙上面的換頁)
+            setTimeout(() => {
+                if(html5QrCode) {
+                    html5QrCode.stop().catch(e => console.log("Stop failed, ignore."));
+                }
+            }, 50);
+
+            // C. 請求資料
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
@@ -153,15 +149,14 @@
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
             if(amountVal == 0) return alert("請輸入金額");
-            
             const btn = document.getElementById('send-btn');
-            btn.innerText = "寫入紀錄中..."; btn.disabled = true;
+            btn.innerText = "寫入中..."; btn.disabled = true;
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 成功！\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易成功！\n餘額：${data.newBalance}`);
                     location.reload();
                 } else {
                     alert("失敗：" + data.message);
