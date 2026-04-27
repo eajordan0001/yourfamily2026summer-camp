@@ -10,28 +10,17 @@
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 15px; background: #f0f2f5; color: #333; margin: 0; }
         h2 { margin: 15px 0; color: #1a1a1a; font-size: 24px; }
         
-        /* 掃描區域優化 */
-        #reader { width: 100%; max-width: 450px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; border: none !important; }
+        #reader { width: 100%; max-width: 450px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; border: none !important; position: relative; }
         
-        /* 隱藏紅框字樣、黃框切換按鈕、以及多餘提示 */
-        #reader__dashboard_section_csr > div > span:first-child,
-        #reader__camera_selection,
-        #reader__dashboard_section_csr > div > span:last-child,
-        #reader img { display: none !important; }
+        /* 隱藏紅框字樣、黃框切換按鈕、以及所有多餘元素 */
+        #reader__dashboard_section_csr, #reader__camera_selection, #reader img, #reader span { display: none !important; }
 
-        /* 放大並置中 Start/Stop 按鈕 */
-        #html5-qrcode-button-camera-start, #html5-qrcode-button-camera-stop {
-            padding: 15px 30px !important; font-size: 18px !important; border-radius: 50px !important; margin: 10px auto !important; display: block !important;
-        }
-
-        /* 結果顯示區域 */
         #result-section { margin-top: 15px; padding: 20px; background: white; border-radius: 20px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .info-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; }
         .name { font-size: 26px; font-weight: bold; color: var(--primary); }
         .balance { font-size: 32px; font-weight: 900; }
 
-        /* 輸入框與按鈕 */
-        input[type="number"] { padding: 15px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; }
+        input[type="number"] { padding: 15px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; background: #fff; color: #000; }
         
         .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
         .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
@@ -41,13 +30,17 @@
         button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; }
+
+        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; box-shadow: 0 4px 15px rgba(0,123,255,0.4); }
     </style>
 </head>
 <body>
 
     <h2>💰 夏令營行動銀行</h2>
     
-    <div id="reader"></div>
+    <div id="reader">
+        <button id="start-btn" onclick="requestPermission()">開啟相機掃描</button>
+    </div>
     
     <div id="result-section">
         <div class="info-box">
@@ -58,20 +51,23 @@
         
         <input type="number" id="amount" value="0" readonly>
         
-        <div class="section-title">快速加總金額 (可重複點擊)</div>
+        <div class="section-title">快速金額加總</div>
         <div class="btn-grid">
+            <button class="btn-small" onclick="addVal(100)" style="color:var(--success)">+100</button>
             <button class="btn-small" onclick="addVal(50)" style="color:var(--success)">+50</button>
             <button class="btn-small" onclick="addVal(10)" style="color:var(--success)">+10</button>
-            <button class="btn-small" onclick="addVal(5)" style="color:var(--success)">+5</button>
+            <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-100</button>
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
             <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-10</button>
-             <button class="btn-small" onclick="addVal(-5)" style="color:var(--success)">-5</button>
         </div>
 
-        <div class="section-title">交易項目紀錄 (Logs 分類)</div>
+        <div class="section-title">交易分類 (Logs)</div>
         <div class="btn-grid">
             <button class="btn-small btn-category" onclick="setNote('餅乾')">🍪 餅乾</button>
             <button class="btn-small btn-category" onclick="setNote('飲料')">🧃 飲料</button>
+            <button class="btn-small btn-category" onclick="setNote('其他')">❓ 其他</button>
+            <button class="btn-small btn-category" onclick="setNote('預留1')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote('預留2')">預留</button>
             <button class="btn-small btn-category" onclick="setNote('預留3')">預留</button>
             <button class="btn-small btn-category" onclick="setNote('預留4')">預留</button>
             <button class="btn-small btn-category" onclick="setNote('預留5')">預留</button>
@@ -79,61 +75,67 @@
             <button class="btn-small btn-category" onclick="setNote('預留7')">預留</button>
             <button class="btn-small btn-category" onclick="setNote('預留8')">預留</button>
             <button class="btn-small btn-category" onclick="setNote('預留9')">預留</button>
-            <button class="btn-small btn-category" onclick="setNote('預留10')">預留</button>
-            <button class="btn-small btn-category" onclick="setNote('預留11')">預留</button>
-            <button class="btn-small btn-category" onclick="setNote('預留12')">預留</button>
         </div>
         <input type="hidden" id="note" value="一般交易">
         
         <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認交易</button>
-        <button class="main btn-cancel" onclick="location.reload()">取消 / 下一位</button>
+        <button class="main btn-cancel" onclick="location.reload()">重新掃描</button>
     </div>
 
     <script>
-        // 🚨 這裡請貼入你的 Apps Script EXEC 網址
+        // 已經內嵌你提供的 Apps Script 網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         
         let currentId = "";
-        let html5QrcodeScanner;
+        let html5QrCode;
 
-        function initScanner() {
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 20, qrbox: 250, 
-                videoConstraints: { facingMode: "environment" },
-                rememberLastUsedCamera: true,
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        function requestPermission() {
+            document.getElementById('start-btn').style.display = 'none';
+            html5QrCode = new Html5Qrcode("reader");
+            
+            const config = { 
+                fps: 30, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                onScanSuccess
+            ).catch(err => {
+                alert("相機開啟失敗，請確認權限");
+                document.getElementById('start-btn').style.display = 'block';
             });
-            html5QrcodeScanner.render(onScanSuccess);
         }
 
         function onScanSuccess(decodedText) {
             currentId = decodedText.trim();
-            document.getElementById('reader').style.display = 'none';
-            document.getElementById('result-section').style.display = 'block';
-            if (navigator.vibrate) navigator.vibrate(70);
-            html5QrcodeScanner.clear();
-
-            fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=0`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "info") {
-                    document.getElementById('display-name').innerText = data.name;
-                    document.getElementById('display-balance').innerText = data.balance;
-                }
+            if (navigator.vibrate) navigator.vibrate(100);
+            
+            html5QrCode.stop().then(() => {
+                document.getElementById('reader').style.display = 'none';
+                document.getElementById('result-section').style.display = 'block';
+                
+                fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=0`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "info") {
+                        document.getElementById('display-name').innerText = data.name;
+                        document.getElementById('display-balance').innerText = data.balance;
+                    }
+                });
             });
         }
 
-        // 🌟 金額連續加總邏輯
         function addVal(v) {
             let input = document.getElementById('amount');
             input.value = parseInt(input.value || 0) + v;
         }
 
-        // 🌟 設定分類備註
         function setNote(n) {
             document.getElementById('note').value = n;
-            // 讓按鈕視覺上有回饋
-            alert("已選擇分類：" + n);
+            alert("分類已選擇：" + n);
         }
 
         function sendData() {
@@ -144,7 +146,6 @@
             const btn = document.getElementById('send-btn');
             btn.innerText = "傳送中..."; btn.disabled = true;
 
-            // 將備註也傳送到後端
             fetch(`${scriptURL}?id=${encodeURIComponent(currentId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
             .then(res => res.json())
             .then(data => {
@@ -155,8 +156,6 @@
             })
             .catch(() => location.reload());
         }
-
-        initScanner();
     </script>
 </body>
 </html>
