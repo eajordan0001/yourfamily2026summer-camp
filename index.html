@@ -10,14 +10,14 @@
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 10px; background: #f0f2f5; margin: 0; overflow-x: hidden; }
         h2 { margin: 15px 0; color: #1a1a1a; font-size: 22px; }
 
-        /* 掃描容器 */
+        /* 掃描容器：隱藏時不關閉相機，只用 CSS 隱藏 */
         #reader-container { width: 90%; max-width: 400px; margin: 10px auto; position: relative; }
         #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; border: 4px solid white !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
 
         /* 交易介面 */
-        #result-section { display: none; padding: 20px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #result-section { display: none; padding: 20px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .info-box { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
         .name { font-size: 28px; font-weight: bold; color: var(--primary); margin-bottom: 5px; }
@@ -46,7 +46,7 @@
     
     <div id="reader-container">
         <div id="reader"></div>
-        <button id="start-btn" onclick="requestPermission()">開啟鏡頭</button>
+        <button id="start-btn" onclick="requestPermission()">啟動鏡頭</button>
     </div>
     
     <div id="result-section">
@@ -78,15 +78,15 @@
         <input type="hidden" id="note" value="一般交易">
         
         <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認扣款 / 加值</button>
-        <button class="main btn-cancel" onclick="resetToScanner()">取消並重掃</button>
+        <button class="main btn-cancel" onclick="resumeScanner()">取消並重掃</button>
     </div>
 
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
         let html5QrCode;
         let globalId = ""; 
+        let isPaused = false; // 關鍵：控制是否接受掃描結果
 
-        // 啟動相機
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
             if(startBtn) startBtn.style.display = 'none';
@@ -97,31 +97,28 @@
 
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => {
-                alert("相機啟動失敗");
+                alert("鏡頭啟動失敗");
                 if(startBtn) startBtn.style.display = 'block';
             });
         }
 
-        // 掃描成功邏輯
         function onScanSuccess(decodedText) {
+            if (isPaused) return; // 如果在交易中，忽略掃描
+            
+            isPaused = true; // 暫停接受新掃描
             if (navigator.vibrate) navigator.vibrate(80);
             globalId = decodedText.trim();
 
-            // 1. 暴力切換介面
+            // 1. 暴力切換介面 (但不關閉相機)
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('main-title').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
             
             document.getElementById('display-id').innerText = globalId;
             document.getElementById('display-name').innerText = "讀取中...";
-            document.getElementById('amount').value = 0; // 重置金額
+            document.getElementById('amount').value = 0;
 
-            // 2. 背景關閉相機
-            setTimeout(() => {
-                if(html5QrCode) html5QrCode.stop().catch(()=>{});
-            }, 50);
-
-            // 3. 查詢資料
+            // 2. 查詢資料
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
@@ -130,13 +127,13 @@
             });
         }
 
-        // 自動回歸掃描畫面
-        function resetToScanner() {
+        // 🚀 重點優化：恢復掃描而不重啟相機
+        function resumeScanner() {
+            isPaused = false; // 重新開始接受掃描結果
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('main-title').style.display = 'block';
-            // 自動重啟相機，不需手動按按鈕
-            requestPermission();
+            // 不需調用 html5QrCode.start，因為相機一直都在動
         }
 
         function addVal(v) {
@@ -163,9 +160,8 @@
             .then(data => {
                 if(data.status === "success") {
                     alert(`✅ 成功！\n餘額：${data.newBalance}`);
-                    // 🚀 關鍵優化：關閉通知後，自動重啟相機
                     btn.innerText = "確認扣款 / 加值"; btn.disabled = false;
-                    resetToScanner();
+                    resumeScanner(); // 交易完成後回到掃描狀態
                 } else {
                     alert("錯誤：" + data.message);
                     btn.innerText = "確認扣款 / 加值"; btn.disabled = false;
