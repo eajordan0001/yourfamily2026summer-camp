@@ -25,14 +25,14 @@
         
         .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
         .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn-small { padding: 12px; font-size: 16px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
-        .btn-category { background: #e9ecef; color: #495057; border: none; }
+        .btn-small { padding: 12px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
+        .btn-category { background: #e9ecef; color: #495057; border: none; font-size: 16px; }
         
         button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; }
 
-        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; }
+        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; box-shadow: 0 4px 15px rgba(0,123,255,0.4); }
     </style>
 </head>
 <body>
@@ -53,14 +53,14 @@
         
         <input type="number" id="amount" value="0" readonly>
         
-        <div class="section-title">快速金額加總</div>
+        <div class="section-title">快速金額加總 (5 / 10 / 50)</div>
         <div class="btn-grid">
-            <button class="btn-small" onclick="addVal(100)">+50</button>
-            <button class="btn-small" onclick="addVal(50)">+10</button>
-            <button class="btn-small" onclick="addVal(10)">+5</button>
-            <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-50</button>
-            <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-10</button>
-            <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-5</button>
+            <button class="btn-small" onclick="addVal(5)" style="color:var(--success)">+5</button>
+            <button class="btn-small" onclick="addVal(10)" style="color:var(--success)">+10</button>
+            <button class="btn-small" onclick="addVal(50)" style="color:var(--success)">+50</button>
+            <button class="btn-small" onclick="addVal(-5)" style="color:var(--danger)">-5</button>
+            <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-10</button>
+            <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
         <div class="section-title">交易分類 (Logs)</div>
@@ -79,7 +79,9 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
+        // 更新後的 Apps Script 網址
+        const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
+        
         let html5QrCode;
         let globalId = ""; 
 
@@ -88,14 +90,13 @@
             startBtn.disabled = true;
             startBtn.innerText = "相機啟動中...";
 
-            // 確保每次啟動都是乾淨的執行個體
             if (html5QrCode) {
                 html5QrCode.clear();
             }
             html5QrCode = new Html5Qrcode("reader");
             
             const config = { 
-                fps: 10, 
+                fps: 15, 
                 qrbox: { width: 250, height: 250 }
             };
 
@@ -106,25 +107,24 @@
             ).then(() => {
                 startBtn.style.display = 'none';
             }).catch(err => {
-                alert("相機開啟失敗：請確保使用 HTTPS 並授權相機權限。");
+                alert("相機開啟失敗：請確認已授權權限並使用 HTTPS 開啟網頁。");
                 startBtn.disabled = false;
                 startBtn.innerText = "開啟相機掃描";
             });
         }
 
         function onScanSuccess(decodedText) {
-            // 1. 立即儲存 ID 並震動
             globalId = decodedText.trim();
             if (navigator.vibrate) navigator.vibrate(100);
             
-            // 2. 立即切換 UI 隱藏相機，讓使用者感覺「掃到了」
+            // 立即換畫面，確保使用者知道「掃到了」
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
 
-            // 3. 背景慢慢停止相機，不擋住 UI 切換
+            // 背景釋放相機
             html5QrCode.stop().catch(err => console.log("Stop failed", err));
 
-            // 4. 發送查詢請求
+            // 發送查詢
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
@@ -137,8 +137,7 @@
                 }
             })
             .catch(err => {
-                console.error("API Error", err);
-                alert("資料讀取失敗，請確認網路或後台設定。");
+                alert("資料讀取失敗，請檢查網路。");
             });
         }
 
@@ -167,16 +166,16 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 交易成功！\n學員：${data.name}\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易成功！\n學員：${data.name}\n變動：${amountVal}\n新餘額：${data.newBalance}`);
                     location.reload();
                 } else {
-                    alert("交易失敗：" + data.message);
+                    alert("交易失敗：" + (data.message || "未知錯誤"));
                     btn.disabled = false;
                     btn.innerText = "確認交易";
                 }
             })
             .catch(err => {
-                alert("連線失敗，請檢查後台");
+                alert("連線失敗，請檢查網路或後台部署。");
                 location.reload();
             });
         }
