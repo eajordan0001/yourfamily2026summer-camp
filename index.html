@@ -10,35 +10,43 @@
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 15px; background: #f0f2f5; color: #333; margin: 0; }
         h2 { margin: 15px 0; color: #1a1a1a; font-size: 24px; }
         
+        /* 相機容器 */
         #reader-container { width: 100%; max-width: 450px; margin: 0 auto; }
         #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; min-height: 280px; border: none !important; }
         
+        /* 隱藏掃描套件多餘的 UI */
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img, #reader span { display: none !important; }
 
+        /* 結果頁面容器 */
         #result-section { margin-top: 15px; padding: 20px; background: white; border-radius: 20px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .info-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; }
         .name { font-size: 26px; font-weight: bold; color: var(--primary); }
         .balance { font-size: 32px; font-weight: 900; }
+        .id-badge { font-size: 12px; color: #999; margin: 5px 0; }
 
+        /* 金額輸入框 */
         input[type="number"] { padding: 12px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; background: #fff; color: #000; outline: none; }
         
+        /* 按鈕格線 */
         .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
         .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn-small { padding: 12px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
         
-        .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; font-size: 16px; transition: all 0.1s; }
-        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; font-weight: bold; }
+        /* 分類按鈕 - 顏色狀態區分 */
+        .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; font-size: 16px; transition: all 0.15s; }
+        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; font-weight: bold; transform: scale(0.98); }
         
+        /* 主按鈕 */
         button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; }
 
-        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; }
+        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; box-shadow: 0 4px 15px rgba(0,123,255,0.4); }
     </style>
 </head>
 <body>
 
-    <h2>💰 夏令營行動銀行</h2>
+    <h2>💰 優兒夏令營行動銀行</h2>
     
     <div id="reader-container">
         <div id="reader"></div>
@@ -47,10 +55,10 @@
     
     <div id="result-section">
         <div class="info-box">
-            <span class="name" id="display-name">讀取中...</span><br>
-            <span style="font-size: 12px; color: #999;">ID: <span id="display-id">---</span></span><br>
+            <div id="display-name" class="name">讀取中...</div>
+            <div class="id-badge">ID: <span id="display-id">---</span></div>
             <span style="font-size: 14px; color: #666;">目前餘額：</span>
-            <span id="display-balance" class="balance">---</span>
+            <div id="display-balance" class="balance">---</div>
         </div>
         
         <input type="number" id="amount" value="0" readonly>
@@ -65,7 +73,7 @@
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
-        <div class="section-title">交易分類 (選中變藍色)</div>
+        <div class="section-title">交易分類 (藍色為選中)</div>
         <div class="btn-grid">
             <button class="btn-small btn-category" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
             <button class="btn-small btn-category" onclick="setNote(this, '飲料')">🧃 飲料</button>
@@ -81,10 +89,13 @@
     </div>
 
     <script>
+        // 設定 Apps Script 網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
+        
         let html5QrCode;
         let globalId = ""; 
 
+        // 1. 請求相機權限並開始掃描
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
             startBtn.disabled = true;
@@ -93,86 +104,110 @@
             html5QrCode = new Html5Qrcode("reader");
             
             const config = { 
-                fps: 30, 
+                fps: 30, // 提高掃描頻率
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0,
                 videoConstraints: { facingMode: "environment" }
             };
 
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .then(() => startBtn.style.display = 'none')
-            .catch(() => {
-                alert("相機開啟失敗，請重試");
+            .then(() => {
+                startBtn.style.display = 'none';
+            })
+            .catch(err => {
+                alert("相機啟動失敗，請確認是否為 HTTPS 環境並已允許權限");
                 location.reload();
             });
         }
 
+        // 2. 掃描成功後的邏輯
         function onScanSuccess(decodedText) {
             globalId = decodedText.trim();
-            if (navigator.vibrate) navigator.vibrate(80);
+            if (navigator.vibrate) navigator.vibrate(100);
             
-            // 立即跳轉
-            document.getElementById('reader-container').style.display = 'none';
+            // [暴力跳轉] 立即顯示結果頁面
+            document.getElementById('reader-container').style.setProperty("display", "none", "important");
             document.getElementById('result-section').style.display = 'block';
             document.getElementById('display-id').innerText = globalId;
 
-            setTimeout(() => { html5QrCode.stop().catch(() => {}); }, 10);
+            // 背景停止相機
+            setTimeout(() => { 
+                if(html5QrCode) html5QrCode.stop().catch(() => {}); 
+            }, 10);
 
-            // 發送請求
-            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
-            .then(res => {
-                if (!res.ok) throw new Error("HTTP錯誤: " + res.status);
-                return res.json();
+            // 初始化文字
+            document.getElementById('display-name').innerText = "連線後台中...";
+            document.getElementById('display-balance').innerText = "---";
+
+            // 抓取後台資料
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`, {
+                method: 'GET',
+                mode: 'cors'
             })
+            .then(res => res.json())
             .then(data => {
-                if(data.name) {
-                    document.getElementById('display-name').innerText = data.name;
-                    document.getElementById('display-balance').innerText = data.balance;
+                if(data.name || data.status === "info" || data.status === "success") {
+                    document.getElementById('display-name').innerText = data.name || "未命名學員";
+                    document.getElementById('display-balance').innerText = data.balance !== undefined ? data.balance : "0";
                 } else {
-                    document.getElementById('display-name').innerText = "非系統學員";
+                    document.getElementById('display-name').innerText = "查無此 ID";
+                    document.getElementById('display-balance').innerText = "檢查試算表";
                 }
             })
             .catch(err => {
                 console.error(err);
-                document.getElementById('display-name').innerText = "連線異常";
+                document.getElementById('display-name').innerText = "網路連線異常";
                 document.getElementById('display-balance').innerText = "請檢查後台權限";
             });
         }
 
+        // 3. 金額增減邏輯
         function addVal(v) {
-            let input = document.getElementById('amount');
+            const input = document.getElementById('amount');
             input.value = parseInt(input.value || 0) + v;
         }
 
+        // 4. 分類按鈕選取邏輯
         function setNote(btn, n) {
+            // 清除所有 active 樣式
             document.querySelectorAll('.btn-category').forEach(el => el.classList.remove('active'));
+            // 點選的按鈕變藍色
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
 
+        // 5. 送出交易
         function sendData() {
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
-            if(amountVal == 0) return alert("金額不可為 0");
             
-            const btn = document.getElementById('send-btn');
-            btn.innerText = "傳送中..."; btn.disabled = true;
+            if(amountVal == 0) return alert("金額不可為 0");
+            if(!globalId) return alert("遺失學員 ID，請刷新頁面");
 
-            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
+            const btn = document.getElementById('send-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "傳送中..."; 
+            btn.disabled = true;
+
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`, {
+                method: 'GET',
+                mode: 'cors'
+            })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 成功！\n${data.name}\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易成功！\n學員：${data.name}\n變動：${amountVal}\n餘額：${data.newBalance}`);
                     location.reload();
                 } else {
-                    alert("交易失敗：" + data.message);
+                    alert("失敗：" + (data.message || "未知錯誤"));
                     btn.disabled = false;
-                    btn.innerText = "確認交易";
+                    btn.innerText = originalText;
                 }
             })
-            .catch(() => {
-                alert("伺服器回應異常");
-                location.reload();
+            .catch(err => {
+                alert("伺服器連線失敗，請檢查網路或 Apps Script 部署");
+                btn.disabled = false;
+                btn.innerText = originalText;
             });
         }
     </script>
