@@ -13,7 +13,6 @@
         #reader-container { width: 100%; max-width: 450px; margin: 0 auto; }
         #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; min-height: 280px; border: none !important; }
         
-        /* 隱藏套件雜訊 */
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img, #reader span { display: none !important; }
 
         #result-section { margin-top: 15px; padding: 20px; background: white; border-radius: 20px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -28,7 +27,7 @@
         .btn-small { padding: 12px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
         
         .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; font-size: 16px; transition: all 0.1s; }
-        .btn-category.active { background: var(--primary); color: white; border-color: #0056b3; }
+        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; font-weight: bold; }
         
         button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
@@ -48,7 +47,8 @@
     
     <div id="result-section">
         <div class="info-box">
-            <span class="name" id="display-name">讀取資料中...</span><br>
+            <span class="name" id="display-name">讀取中...</span><br>
+            <span style="font-size: 12px; color: #999;">ID: <span id="display-id">---</span></span><br>
             <span style="font-size: 14px; color: #666;">目前餘額：</span>
             <span id="display-balance" class="balance">---</span>
         </div>
@@ -65,7 +65,7 @@
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
-        <div class="section-title">交易分類</div>
+        <div class="section-title">交易分類 (選中變藍色)</div>
         <div class="btn-grid">
             <button class="btn-small btn-category" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
             <button class="btn-small btn-category" onclick="setNote(this, '飲料')">🧃 飲料</button>
@@ -93,53 +93,49 @@
             html5QrCode = new Html5Qrcode("reader");
             
             const config = { 
-                fps: 60, // 再次調高偵測頻率
+                fps: 30, 
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0,
-                videoConstraints: {
-                    facingMode: "environment",
-                    focusMode: "continuous" // 強制持續對焦
-                }
+                videoConstraints: { facingMode: "environment" }
             };
 
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .then(() => startBtn.style.display = 'none')
             .catch(() => {
-                alert("相機開啟失敗");
-                startBtn.disabled = false;
-                startBtn.innerText = "開啟相機掃描";
+                alert("相機開啟失敗，請重試");
+                location.reload();
             });
         }
 
-        // 核心優化：立即跳轉
         function onScanSuccess(decodedText) {
-            // 1. 第一時間鎖定 ID 並震動回饋
             globalId = decodedText.trim();
             if (navigator.vibrate) navigator.vibrate(80);
             
-            // 2. [關鍵] 毫秒級跳轉介面，不管相機關了沒
+            // 立即跳轉
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
+            document.getElementById('display-id').innerText = globalId;
 
-            // 3. 背景非同步處理 (不阻塞介面)
-            setTimeout(() => {
-                html5QrCode.stop().catch(() => {});
-            }, 10);
+            setTimeout(() => { html5QrCode.stop().catch(() => {}); }, 10);
 
-            // 4. 背景查詢資料
+            // 發送請求
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP錯誤: " + res.status);
+                return res.json();
+            })
             .then(data => {
                 if(data.name) {
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
                 } else {
-                    alert("查無學員 ID");
-                    location.reload();
+                    document.getElementById('display-name').innerText = "非系統學員";
                 }
             })
-            .catch(() => {
-                document.getElementById('display-name').innerText = "網路連線異常";
+            .catch(err => {
+                console.error(err);
+                document.getElementById('display-name').innerText = "連線異常";
+                document.getElementById('display-balance').innerText = "請檢查後台權限";
             });
         }
 
@@ -157,11 +153,10 @@
         function sendData() {
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
-            if(amountVal == 0) return alert("金額不能為 0");
+            if(amountVal == 0) return alert("金額不可為 0");
             
             const btn = document.getElementById('send-btn');
-            btn.innerText = "傳送中..."; 
-            btn.disabled = true;
+            btn.innerText = "傳送中..."; btn.disabled = true;
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
             .then(res => res.json())
@@ -170,12 +165,15 @@
                     alert(`✅ 成功！\n${data.name}\n餘額：${data.newBalance}`);
                     location.reload();
                 } else {
-                    alert("失敗：" + data.message);
+                    alert("交易失敗：" + data.message);
                     btn.disabled = false;
                     btn.innerText = "確認交易";
                 }
             })
-            .catch(() => location.reload());
+            .catch(() => {
+                alert("伺服器回應異常");
+                location.reload();
+            });
         }
     </script>
 </body>
