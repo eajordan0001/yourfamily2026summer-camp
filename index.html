@@ -6,12 +6,12 @@
     <title>夏令營行動銀行 Pro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; }
+        :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; --light-gray: #e9ecef; }
         body { font-family: -apple-system, sans-serif; text-align: center; padding: 15px; background: #f0f2f5; color: #333; margin: 0; }
         h2 { margin: 15px 0; color: #1a1a1a; font-size: 24px; }
         
         #reader-container { width: 100%; max-width: 450px; margin: 0 auto; }
-        #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; min-height: 250px; }
+        #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: #000; min-height: 250px; border: none !important; }
         
         /* 隱藏套件雜訊 */
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img, #reader span { display: none !important; }
@@ -21,18 +21,21 @@
         .name { font-size: 26px; font-weight: bold; color: var(--primary); }
         .balance { font-size: 32px; font-weight: 900; }
 
-        input[type="number"] { padding: 15px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; background: #fff; color: #000; }
+        input[type="number"] { padding: 15px; font-size: 28px; width: 85%; margin: 10px 0; border-radius: 12px; border: 2px solid #ddd; text-align: center; font-weight: bold; background: #fff; color: #000; outline: none; }
         
         .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 5px 5px; font-weight: bold; }
         .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn-small { padding: 12px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; }
-        .btn-category { background: #e9ecef; color: #495057; border: none; font-size: 16px; }
+        
+        /* 分類按鈕樣式 */
+        .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; font-size: 16px; transition: all 0.2s; }
+        .btn-category.active { background: var(--primary); color: white; border-color: #0056b3; transform: scale(0.95); }
         
         button.main { padding: 18px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; width: 100%; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; }
 
-        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; box-shadow: 0 4px 15px rgba(0,123,255,0.4); }
+        #start-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 50px auto; display: block; }
     </style>
 </head>
 <body>
@@ -63,14 +66,14 @@
             <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
         </div>
 
-        <div class="section-title">交易分類 (Logs)</div>
+        <div class="section-title">交易分類 (選中變藍色)</div>
         <div class="btn-grid">
-            <button class="btn-small btn-category" onclick="setNote('餅乾')">🍪 餅乾</button>
-            <button class="btn-small btn-category" onclick="setNote('飲料')">🧃 飲料</button>
-            <button class="btn-small btn-category" onclick="setNote('其他')">❓ 其他</button>
-            <button class="btn-small btn-category" onclick="setNote('預留1')">預留</button>
-            <button class="btn-small btn-category" onclick="setNote('預留2')">預留</button>
-            <button class="btn-small btn-category" onclick="setNote('預留3')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '飲料')">🧃 飲料</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '其他')">❓ 其他</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '預留1')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '預留2')">預留</button>
+            <button class="btn-small btn-category" onclick="setNote(this, '預留3')">預留</button>
         </div>
         <input type="hidden" id="note" value="一般交易">
         
@@ -79,7 +82,6 @@
     </div>
 
     <script>
-        // 更新後的 Apps Script 網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
         
         let html5QrCode;
@@ -88,16 +90,21 @@
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
             startBtn.disabled = true;
-            startBtn.innerText = "相機啟動中...";
+            startBtn.innerText = "相機快馬加鞭中...";
 
-            if (html5QrCode) {
-                html5QrCode.clear();
-            }
             html5QrCode = new Html5Qrcode("reader");
             
+            // 🚀 優化掃描速度：fps 提高，減少 qrbox 大小提高解析效率
             const config = { 
-                fps: 15, 
-                qrbox: { width: 250, height: 250 }
+                fps: 25, 
+                qrbox: { width: 220, height: 220 },
+                aspectRatio: 1.0,
+                // 限制影像解析度避免運算負擔過重
+                videoConstraints: {
+                    facingMode: "environment",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                }
             };
 
             html5QrCode.start(
@@ -107,7 +114,7 @@
             ).then(() => {
                 startBtn.style.display = 'none';
             }).catch(err => {
-                alert("相機開啟失敗：請確認已授權權限並使用 HTTPS 開啟網頁。");
+                alert("相機開啟失敗，請確認已授權。");
                 startBtn.disabled = false;
                 startBtn.innerText = "開啟相機掃描";
             });
@@ -117,14 +124,13 @@
             globalId = decodedText.trim();
             if (navigator.vibrate) navigator.vibrate(100);
             
-            // 立即換畫面，確保使用者知道「掃到了」
+            // 🚀 瞬間切換 UI，不再等待 stop()
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
 
-            // 背景釋放相機
-            html5QrCode.stop().catch(err => console.log("Stop failed", err));
+            html5QrCode.stop().catch(() => {});
 
-            // 發送查詢
+            // 同步獲取資料
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
@@ -136,9 +142,7 @@
                     location.reload();
                 }
             })
-            .catch(err => {
-                alert("資料讀取失敗，請檢查網路。");
-            });
+            .catch(() => alert("資料讀取失敗！"));
         }
 
         function addVal(v) {
@@ -146,9 +150,15 @@
             input.value = parseInt(input.value || 0) + v;
         }
 
-        function setNote(n) {
+        // 🎨 更新分類按鈕點選邏輯
+        function setNote(btn, n) {
+            // 清除所有分類按鈕的 active 樣式
+            document.querySelectorAll('.btn-category').forEach(el => {
+                el.classList.remove('active');
+            });
+            // 幫點選的按鈕加上 active 樣式
+            btn.classList.add('active');
             document.getElementById('note').value = n;
-            alert("分類已選擇：" + n);
         }
 
         function sendData() {
@@ -159,25 +169,22 @@
             if(!globalId) return alert("遺失學員 ID，請重新掃描");
 
             const btn = document.getElementById('send-btn');
-            btn.innerText = "傳送中..."; 
+            btn.innerText = "交易傳送中..."; 
             btn.disabled = true;
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 交易成功！\n學員：${data.name}\n變動：${amountVal}\n新餘額：${data.newBalance}`);
+                    alert(`✅ 成功！\n${data.name}\n新餘額：${data.newBalance}`);
                     location.reload();
                 } else {
-                    alert("交易失敗：" + (data.message || "未知錯誤"));
+                    alert("交易失敗：" + data.message);
                     btn.disabled = false;
                     btn.innerText = "確認交易";
                 }
             })
-            .catch(err => {
-                alert("連線失敗，請檢查網路或後台部署。");
-                location.reload();
-            });
+            .catch(() => location.reload());
         }
     </script>
 </body>
