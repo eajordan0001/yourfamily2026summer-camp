@@ -55,12 +55,12 @@
         
         <div class="section-title">快速金額加總</div>
         <div class="btn-grid">
-            <button class="btn-small" onclick="addVal(100)">+100</button>
             <button class="btn-small" onclick="addVal(50)">+50</button>
             <button class="btn-small" onclick="addVal(10)">+10</button>
-            <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-100</button>
-            <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-50</button>
-            <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-10</button>
+            <button class="btn-small" onclick="addVal(5)">+5</button>
+            <button class="btn-small" onclick="addVal(-100)" style="color:var(--danger)">-50</button>
+            <button class="btn-small" onclick="addVal(-50)" style="color:var(--danger)">-10</button>
+            <button class="btn-small" onclick="addVal(-10)" style="color:var(--danger)">-5</button>
         </div>
 
         <div class="section-title">交易分類 (Logs)</div>
@@ -91,8 +91,8 @@
             html5QrCode = new Html5Qrcode("reader");
             
             const config = { 
-                fps: 15, 
-                qrbox: { width: 250, height: 250 }
+                fps: 20, 
+                qrbox: { width: 200, height: 200 }
             };
 
             html5QrCode.start(
