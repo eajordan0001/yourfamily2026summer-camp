@@ -10,7 +10,7 @@
         .container { background: white; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #ddd; background: #000; }
         #result-section { display: none; }
-        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; }
+        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 2px solid #eee; border-radius: 10px; }
         .name-txt { font-size: 24px; font-weight: bold; color: #e6007e; }
         .balance-txt { font-size: 32px; font-weight: bold; }
         input[type="number"] { width: 80%; padding: 10px; font-size: 28px; margin: 10px 0; text-align: center; border: 2px solid #ccc; border-radius: 8px; }
@@ -51,7 +51,7 @@
             </div>
 
             <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
-            <div class="item-grid">
+            <div class="item-grid" id="item-box">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">飲料</button>
                 <button class="btn-item" onclick="setN(this, '其他')">其他</button>
@@ -73,54 +73,54 @@
     </div>
 
     <script>
-        // 🚨 請務必確認此處填寫的是完整的 Google Apps Script 執行網址 (以 /exec 結尾)
+        // 🚀 已更新為您的最新部署網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         let scanner, globalId = "", isBusy = false;
 
         function startScan() {
             isBusy = false;
+            globalId = ""; // 每次啟動掃描前確保 ID 為空
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
             if (!scanner) scanner = new Html5Qrcode("reader");
             
-            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
-                if (isBusy) return;
-                isBusy = true;
-                globalId = text.trim();
-                
-                document.getElementById('amount').value = "0";
-                const btns = document.querySelectorAll('.btn-item');
-                btns.forEach(b => b.classList.remove('active'));
-                btns[0].classList.add('active');
-                document.getElementById('note').value = btns[0].innerText;
+            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess)
+            .catch(e => console.error(e));
+        }
 
-                document.getElementById('reader-container').style.display = 'none';
-                document.getElementById('result-section').style.display = 'block';
-                scanner.stop().then(() => fetchData());
-            }).catch(e => console.error(e));
+        function onScanSuccess(text) {
+            if (isBusy) return;
+            isBusy = true;
+            
+            // 🚀 關鍵修復：立即更新 globalId，防止殘留上一位學員的資料
+            globalId = text.trim();
+            console.log("掃描成功，目前 ID:", globalId);
+
+            // 重置介面數值
+            document.getElementById('amount').value = "0";
+            const btns = document.querySelectorAll('.btn-item');
+            btns.forEach(b => b.classList.remove('active'));
+            btns[0].classList.add('active');
+            document.getElementById('note').value = btns[0].innerText;
+            document.getElementById('display-name').innerText = "讀取中...";
+            document.getElementById('display-balance').innerText = "---";
+
+            document.getElementById('reader-container').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            
+            // 停止掃描並獲取資料
+            scanner.stop().then(() => fetchData());
         }
 
         async function fetchData() {
             try {
-                // 強制加入隨機參數避免快取，並檢查 Response 狀態
-                const response = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&_=${Date.now()}`);
-                
-                if (!response.ok) throw new Error("網路連線不穩定");
-                
-                const textData = await response.text(); // 先取回純文字
-                let data;
-                try {
-                    data = JSON.parse(textData); // 嘗試解析
-                } catch(e) {
-                    throw new Error("回傳格式非 JSON，請檢查 Google Script 部署設定是否設為「所有人(Anyone)」");
-                }
-
+                // 增加時間戳記確保不讀取快取
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
+                const data = await res.json();
                 if (data.status === "success") {
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
-                } else { 
-                    throw new Error(data.message); 
-                }
+                } else { throw new Error(data.message); }
             } catch (e) {
                 alert("讀取失敗：" + e.message);
                 resetUI();
@@ -130,24 +130,37 @@
         async function doTrade() {
             const amt = document.getElementById('amount').value;
             if (amt == 0) return alert("請輸入金額");
+            
             const btn = document.getElementById('ok-btn');
             const note = document.getElementById('note').value;
-            btn.innerText = "寫入中..."; btn.disabled = true;
+            
+            // 鎖定按鈕，防止重複點擊
+            btn.innerText = "寫入中..."; 
+            btn.disabled = true;
 
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(note)}&_=${Date.now()}`);
+                // 再次確保使用當前的 globalId
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(note)}&t=${Date.now()}`);
                 const data = await res.json();
+                
                 if (data.status === "success") {
                     alert(`✅ 交易完成！\n學員：${data.name}\n新餘額：${data.newBalance}`);
                     resetUI();
-                } else { alert("錯誤：" + data.message); resetBtn(); }
+                } else { 
+                    alert("錯誤：" + data.message); 
+                    resetBtn(); 
+                }
             } catch (e) {
-                alert("網路不穩，請手動確認試算表。");
+                alert("網路異常，請確認試算表紀錄。");
                 resetBtn();
             }
         }
 
-        function resetUI() { resetBtn(); startScan(); }
+        function resetUI() {
+            resetBtn();
+            startScan();
+        }
+
         function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
@@ -156,7 +169,8 @@
         }
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認加值/扣款"; btn.disabled = false;
+            btn.innerText = "確認加值/扣款"; 
+            btn.disabled = false;
         }
         window.onload = startScan;
     </script>
