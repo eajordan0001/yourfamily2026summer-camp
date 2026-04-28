@@ -141,7 +141,7 @@
         .btn-plus { color: var(--success); }
         .btn-minus { color: var(--danger); }
 
-        /* 🚀 交易項目按鈕 (調整為 3列4欄) */
+        /* 交易項目按鈕 (3列4欄) */
         .btn-grid-items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .btn-item { background: #eee; color: #444; border-radius: 12px; font-size: 14px; padding: 12px 2px; border: 1px solid #ddd; font-weight: bold; }
         .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
@@ -227,9 +227,13 @@
             document.getElementById('logo-display').style.display = 'none';
             document.getElementById('reader').style.display = 'block';
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            
+            // 如果相機已經在跑了就不要重複啟動
+            if (html5QrCode.getState() === 2) return;
+
             const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .catch(err => alert("相機啟動失敗"));
+            .catch(err => console.error("相機啟動失敗", err));
         }
 
         function onScanSuccess(decodedText) {
@@ -247,7 +251,8 @@
             document.getElementById('display-name').innerText = "讀取中...";
             document.getElementById('amount').value = 0;
 
-            setTimeout(() => { if(html5QrCode) html5QrCode.stop().catch(()=>{}); }, 50);
+            // 進入交易畫面時暫時停止掃描，但不關閉相機，以利稍後快速恢復
+            if(html5QrCode) html5QrCode.pause();
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
@@ -257,14 +262,21 @@
             });
         }
 
+        // 🚀 修改後的 resumeScanner：直接自動重啟相機
         function resumeScanner() {
             isPaused = false;
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('main-title').style.display = 'block';
             document.getElementById('header-sep').style.display = 'block';
             document.getElementById('reader-container').style.display = 'block';
-            document.getElementById('logo-display').style.display = 'block';
-            document.getElementById('reader').style.display = 'none';
+            
+            // 直接呼叫啟動相機邏輯，略過 Logo 畫面
+            requestPermission();
+            
+            // 如果剛才是用 pause()，這裡執行 resume()
+            if(html5QrCode && html5QrCode.getState() === 3) {
+                html5QrCode.resume();
+            }
         }
 
         function addVal(v) {
@@ -288,7 +300,7 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
+                    alert(`✅ 完成！\n學員：${data.name}\n變動：${amountVal}\n餘額：${data.newBalance}`);
                     resumeScanner();
                 } else alert("失敗：" + data.message);
                 btn.innerText = "確認交易"; btn.disabled = false;
