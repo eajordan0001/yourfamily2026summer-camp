@@ -3,45 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>優兒行動銀行系統</title>
+    <title>優兒行動銀行</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333; }
         .container { background: white; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #ddd; }
         #result-section { display: none; }
-        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 2px solid #eee; border-radius: 10px; line-height: 1.6; }
-        .name-highlight { font-size: 26px; font-weight: bold; color: #e6007e; }
-        .balance-highlight { font-size: 36px; font-weight: bold; color: #000; }
+        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 2px solid #eee; border-radius: 10px; }
+        .name-highlight { font-size: 24px; font-weight: bold; color: #e6007e; }
+        .balance-highlight { font-size: 32px; font-weight: bold; }
         
-        input[type="number"] { width: 85%; padding: 12px; font-size: 32px; margin: 10px 0; text-align: center; border: 2px solid #333; border-radius: 10px; }
+        input[type="number"] { width: 80%; padding: 10px; font-size: 28px; margin: 10px 0; text-align: center; border: 2px solid #ccc; border-radius: 8px; }
         
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
-        .btn-small { padding: 12px 0; font-size: 18px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: white; font-weight: bold; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 10px 0; }
+        .btn-small { padding: 10px 0; font-size: 16px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; background: white; font-weight: bold; }
         
-        .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
-        .btn-item { padding: 12px 2px; font-size: 14px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 8px; font-weight: bold; }
+        .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 15px 0; }
+        .btn-item { padding: 10px 2px; font-size: 13px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 5px; font-weight: bold; }
         .btn-item.active { background: #e6007e; color: white; border-color: #e6007e; }
         
-        .btn-main { width: 100%; padding: 18px; font-size: 22px; background: #28a745; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-reload { background: #6c757d; margin-top: 15px; font-size: 16px; }
-        .error-text { color: red; font-size: 12px; margin-top: 5px; }
+        .btn-main { width: 100%; padding: 15px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-reload { background: #6c757d; margin-top: 15px; }
+        .error-msg { color: red; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="color:#e6007e;">💰 優兒行動銀行</h2>
-        
+        <h2>💰 優兒行動銀行</h2>
         <div id="reader-container">
             <div id="reader"></div>
-            <p style="font-weight:bold;">請掃描學員 QR Code</p>
+            <p>請對準學員 QR Code 進行掃描</p>
         </div>
 
         <div id="result-section">
             <div class="info-display">
-                學員姓名：<br><span id="display-name" class="name-highlight">讀取中...</span><br>
-                目前餘額：<br><span id="display-balance" class="balance-highlight">---</span>
-                <div id="error-log" class="error-text"></div>
+                學員：<span id="display-name" class="name-highlight">讀取中...</span><br>
+                餘額：<span id="display-balance" class="balance-highlight">---</span>
+                <div id="msg-area" class="error-msg"></div>
             </div>
             
             <input type="number" id="amount" value="0" inputmode="numeric">
@@ -57,11 +56,11 @@
                 <button class="btn-small" style="color:red" onclick="adj(-50)">-50</button>
             </div>
 
-            <div style="text-align: left; font-size: 14px; font-weight:bold;">交易項目：</div>
+            <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
             <div class="item-grid">
-                <button class="btn-item active" onclick="setN(this, '餅乾')">🍪 餅乾</button>
-                <button class="btn-item" onclick="setN(this, '飲料')">🧃 飲料</button>
-                <button class="btn-item" onclick="setN(this, '其他')">❓ 其他</button>
+                <button class="btn-item active" onclick="setN(this, '餅乾')">餅乾</button>
+                <button class="btn-item" onclick="setN(this, '飲料')">飲料</button>
+                <button class="btn-item" onclick="setN(this, '其他')">其他</button>
                 <button class="btn-item" onclick="setN(this, '預留1')">預留1</button>
                 <button class="btn-item" onclick="setN(this, '預留2')">預留2</button>
                 <button class="btn-item" onclick="setN(this, '預留3')">預留3</button>
@@ -74,16 +73,16 @@
             </div>
             <input type="hidden" id="note" value="餅乾">
             
-            <button id="ok-btn" class="btn-main" onclick="doTrade()">確認送出交易</button>
-            <button class="btn-main btn-reload" onclick="location.reload()">取消並重新掃描</button>
+            <button id="ok-btn" class="btn-main" onclick="doTrade()">確認扣款</button>
+            <button class="btn-main btn-reload" onclick="location.reload()">重新掃描</button>
         </div>
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
+        const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec";
         let scanner, globalId = "", isBusy = false, tid = "";
 
-        function initScanner() {
+        function startScan() {
             scanner = new Html5Qrcode("reader");
             scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
                 if (isBusy) return;
@@ -94,31 +93,21 @@
                 document.getElementById('result-section').style.display = 'block';
                 scanner.stop();
                 fetchData();
-            }).catch(err => console.error("掃描器啟動失敗", err));
+            });
         }
 
-        async function fetchData(retry = 0) {
-            const errLog = document.getElementById('error-log');
+        async function fetchData() {
+            const msgArea = document.getElementById('msg-area');
             try {
-                // 🚀 使用更穩定的 fetch 參數
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
                 const data = await res.json();
                 if (data.status === "success") {
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
-                    errLog.innerText = ""; 
                 } else { throw new Error(data.message); }
             } catch (e) {
-                if (retry < 2) {
-                    errLog.innerText = `連線重試中 (${retry + 1})...`;
-                    setTimeout(() => fetchData(retry + 1), 1500);
-                } else {
-                    document.getElementById('display-name').innerText = "讀取失敗";
-                    errLog.innerText = "原因：" + (e.message || "網路連線中斷");
-                }
+                document.getElementById('display-name').innerText = "失敗";
+                msgArea.innerText = e.message || "網路連線錯誤";
             }
         }
 
@@ -130,17 +119,14 @@
             btn.innerText = "處理中..."; btn.disabled = true;
 
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(note)}`, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(note)}`);
                 const data = await res.json();
                 if (data.status === "success") {
-                    alert(`✅ 成功！\n學員：${data.name}\n新餘額：${data.newBalance}`);
+                    alert("交易成功！學員：" + data.name + "\n新餘額：" + data.newBalance);
                     location.reload();
-                } else { alert("❌ 失敗：" + data.message); resetBtn(); }
+                } else { alert("錯誤：" + data.message); resetBtn(); }
             } catch (e) {
-                alert("🔴 連線不穩，請確認試算表是否有紀錄。");
+                alert("網路異常，請稍後再試。");
                 resetBtn();
             }
         }
@@ -153,10 +139,10 @@
         }
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認送出交易"; btn.disabled = false;
+            btn.innerText = "確認扣款"; btn.disabled = false;
         }
 
-        window.onload = initScanner;
+        window.onload = startScan;
     </script>
 </body>
 </html>
