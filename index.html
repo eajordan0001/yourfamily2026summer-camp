@@ -19,102 +19,33 @@
         body { 
             font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif; 
             text-align: center; 
-            margin: 0; 
-            padding: 0; 
+            margin: 0; padding: 0; 
             background-color: var(--brand-pink); 
             color: var(--text-on-pink);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            position: relative;
+            display: flex; flex-direction: column;
+            overflow-x: hidden; position: relative;
         }
 
         body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('./logo.png?v=1'); 
-            background-size: 80% auto;
-            background-repeat: repeat;
-            background-position: center;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
+            background-size: 80% auto; background-repeat: repeat; background-position: center;
+            opacity: 0.15; z-index: 0; pointer-events: none;
         }
 
-        .main-container {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom);
-        }
+        .main-container { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom); }
+        h2 { margin: 25px 0 10px; font-size: 26px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .header-sep { width: 90%; height: 4px; background-color: white; border-radius: 2px; margin: 0 auto 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        h2 { 
-            margin: 25px 0 10px; 
-            color: var(--text-on-pink); 
-            font-size: 26px; 
-            font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .header-sep {
-            width: 90%;
-            height: 4px;
-            background-color: white;
-            border-radius: 2px;
-            margin: 0 auto 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        #reader-container { 
-            width: 100%; 
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-
-        #reader { 
-            width: 85%; 
-            max-width: 350px;
-            border-radius: 25px; 
-            overflow: hidden; 
-            background: #000; 
-            border: 6px solid white !important; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            margin-bottom: 20px;
-            display: none;
-        }
+        #reader-container { width: 100%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; flex: 1; }
+        #reader { width: 85%; max-width: 350px; border-radius: 25px; overflow: hidden; background: #000; border: 6px solid white !important; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 20px; display: none; }
         #reader__dashboard_section_csr, #reader__camera_selection { display: none !important; }
 
-        #logo-display {
-            width: 90%;
-            max-width: 380px;
-            margin: 20px auto;
-            animation: fadeIn 0.5s ease;
-        }
-        #logo-display img {
-            width: 100%;
-            height: auto;
-            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
-        }
+        #logo-display { width: 90%; max-width: 380px; margin: 20px auto; animation: fadeIn 0.5s ease; }
+        #logo-display img { width: 100%; height: auto; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4)); }
 
-        #result-section { 
-            display: none;
-            padding: 20px; 
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
-            margin: 0 5px 20px; 
-            color: var(--text-on-glass);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            animation: slideUp 0.3s ease-out;
-        }
+        #result-section { display: none; padding: 20px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); margin: 0 5px 20px; color: var(--text-on-glass); border: 1px solid rgba(255, 255, 255, 0.4); animation: slideUp 0.3s ease-out; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -122,34 +53,25 @@
         .info-box { background: rgba(0,0,0,0.03); padding: 12px; border-radius: 20px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
         .name { font-size: 30px; font-weight: bold; color: var(--brand-pink); margin-bottom: 5px; }
         .balance { font-size: 40px; font-weight: 900; color: #000; }
-        .id-badge { font-size: 13px; color: #777; margin-bottom: 5px; }
+        .id-badge { font-size: 13px; color: #777; }
 
-        .input-wrapper { margin: 10px 0; }
-        input[type="number"] { 
-            padding: 12px; font-size: 38px; width: 90%; border-radius: 18px; border: 4px solid #333; 
-            text-align: center; font-weight: 900; background: rgba(255,255,255,0.8); outline: none;
-        }
+        input[type="number"] { padding: 12px; font-size: 38px; width: 90%; border-radius: 18px; border: 4px solid #333; text-align: center; font-weight: 900; background: white; outline: none; margin: 10px 0; }
         
         .section-title { text-align: left; font-size: 15px; color: #555; margin: 12px 0 6px 10px; font-weight: bold; }
-
         .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        .btn-plus { color: var(--success); }
-        .btn-minus { color: var(--danger); }
+        .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: 800; }
+        .btn-plus { color: var(--success); } .btn-minus { color: var(--danger); }
 
         .btn-grid-items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .btn-item { background: #eee; color: #444; border-radius: 12px; font-size: 14px; padding: 12px 2px; border: 1px solid #ddd; font-weight: bold; }
-        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
+        .btn-item.active { background: var(--brand-pink) !important; color: white !important; }
         
-        button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
+        button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; cursor: pointer; }
         .btn-confirm { background: var(--success); color: white; box-shadow: 0 6px 20px rgba(40,167,69,0.4); }
+        .btn-confirm:disabled { background: #ccc; box-shadow: none; }
         .btn-cancel { background: rgba(0,0,0,0.5); color: white; margin-top: 20px; font-size: 16px; border-radius: 15px; padding: 12px; width: auto; align-self: center;}
 
-        #start-btn { 
-            padding: 22px 60px; font-size: 26px; font-weight: bold; background-color: var(--brand-cyan); 
-            color: white; border: none; border-radius: 60px; cursor: pointer; margin: 40px auto; 
-            display: block; box-shadow: 0 10px 30px rgba(0,191,255,0.4);
-        }
+        #start-btn { padding: 22px 60px; font-size: 26px; font-weight: bold; background-color: var(--brand-cyan); color: white; border: none; border-radius: 60px; cursor: pointer; margin: 40px auto; display: block; }
     </style>
 </head>
 <body>
@@ -157,7 +79,6 @@
     <div class="main-container">
         <h2 id="main-title">💰 優兒夏令營行動銀行</h2>
         <div id="header-sep" class="header-sep"></div>
-        
         <div id="reader-container">
             <div id="reader"></div>
             <div id="logo-display">
@@ -173,10 +94,7 @@
                 <div style="font-size: 14px; color: #666; margin-top: 8px;">目前餘額</div>
                 <div id="display-balance" class="balance">---</div>
             </div>
-            
-            <div class="input-wrapper">
-                <input type="number" id="amount" value="0" pattern="[0-9-]*">
-            </div>
+            <input type="number" id="amount" value="0">
             
             <div class="section-title">快速金額加總</div>
             <div class="btn-grid-8">
@@ -206,26 +124,22 @@
                 <button class="btn-item" onclick="setNote(this, '預留9')">預留9</button>
             </div>
             <input type="hidden" id="note" value="一般交易">
-            
             <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認交易</button>
-            <button class="main btn-cancel" onclick="resumeScanner()">取消並重掃</button>
+            <button id="cancel-btn" class="main btn-cancel" onclick="resumeScanner()">取消並重掃</button>
         </div>
     </div>
 
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
-        let html5QrCode;
-        let globalId = ""; 
-        let isPaused = false;
+        let html5QrCode, globalId = "", isPaused = false, currentTid = "";
 
         function requestPermission() {
             document.getElementById('logo-display').style.display = 'none';
             document.getElementById('reader').style.display = 'block';
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             if (html5QrCode.getState() === 2) return;
-            const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
-            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .catch(err => console.error("相機啟動失敗", err));
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 220 }, onScanSuccess)
+            .catch(err => console.error(err));
         }
 
         function onScanSuccess(decodedText) {
@@ -233,28 +147,24 @@
             isPaused = true;
             if (navigator.vibrate) navigator.vibrate(80);
             globalId = decodedText.trim();
+            // 🚀 關鍵優化：掃描成功即生成唯一的交易序號 (TID)
+            currentTid = "TID" + Date.now() + Math.floor(Math.random()*1000);
 
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('main-title').style.display = 'none';
             document.getElementById('header-sep').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            
             document.getElementById('display-id').innerText = globalId;
             document.getElementById('display-name').innerText = "讀取中...";
             document.getElementById('amount').value = 0;
-
             if(html5QrCode) html5QrCode.pause();
 
-            // 查詢餘額也加入簡易錯誤處理
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('display-name').innerText = data.name || "未命名";
                 document.getElementById('display-balance').innerText = data.balance ?? "0";
-            })
-            .catch(() => {
-                document.getElementById('display-name').innerText = "連線緩慢...";
-            });
+            }).catch(() => { document.getElementById('display-name').innerText = "連線中..."; });
         }
 
         function resumeScanner() {
@@ -264,75 +174,51 @@
             document.getElementById('header-sep').style.display = 'block';
             document.getElementById('reader-container').style.display = 'block';
             requestPermission();
-            if(html5QrCode && html5QrCode.getState() === 3) {
-                html5QrCode.resume();
-            }
+            if(html5QrCode && html5QrCode.getState() === 3) html5QrCode.resume();
         }
 
-        function addVal(v) {
-            const input = document.getElementById('amount');
-            input.value = (parseInt(input.value) || 0) + v;
-        }
+        function addVal(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
+        function setNote(btn, n) { document.querySelectorAll('.btn-item').forEach(el => el.classList.remove('active')); btn.classList.add('active'); document.getElementById('note').value = n; }
 
-        function setNote(btn, n) {
-            document.querySelectorAll('.btn-item').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('note').value = n;
-        }
-
-        // 🚀 強化版發送邏輯：增加自動重試與優化超時處理
-        async function sendData(retryCount = 0) {
+        // 🚀 終極修復：防止重複交易
+        async function sendData() {
             const amountVal = document.getElementById('amount').value;
             if(amountVal == 0 || amountVal == "") return alert("請輸入金額");
             
             const btn = document.getElementById('send-btn');
-            const noteVal = document.getElementById('note').value;
+            const cancelBtn = document.getElementById('cancel-btn');
             
-            btn.innerText = retryCount > 0 ? `重試中(${retryCount})...` : "連線中...";
+            // 1. 立即禁用按鈕防止多次點擊
+            btn.innerText = "交易處理中...";
             btn.disabled = true;
+            cancelBtn.disabled = true;
 
-            const fullURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`;
+            // 🚀 將 TID 加入網址參數。後端試算表需配合檢查此 TID 是否重複 (可視需求調整後端)。
+            const fullURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(document.getElementById('note').value)}&tid=${currentTid}`;
 
             try {
-                // 使用 AbortController 增加自定義超時限制（15秒）
+                // 2. 設置更長的超時
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-                const response = await fetch(fullURL, {
-                    method: 'GET',
-                    mode: 'cors',
-                    signal: controller.signal
-                });
-
+                const response = await fetch(fullURL, { method: 'GET', mode: 'cors', signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                if (!response.ok) throw new Error('伺服器回應異常');
-
                 const data = await response.json();
-
                 if(data.status === "success") {
-                    alert(`✅ 交易完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易成功！\n學員：${data.name}\n餘額：${data.newBalance}`);
                     resumeScanner();
                 } else {
-                    alert("⚠️ 失敗：" + (data.message || "未知錯誤"));
+                    alert("⚠️ 錯誤：" + data.message);
                 }
             } catch (error) {
-                console.error('Fetch Error:', error);
-                
-                // 如果自動重試次數少於 1 次，則自動再發送一次
-                if (retryCount < 1) {
-                    console.log("自動嘗試重新發送...");
-                    sendData(retryCount + 1);
-                } else {
-                    // 真的不行的話，才跳出手動確認
-                    const retry = confirm("目前網路訊號不佳，是否要再次嘗試發送交易？");
-                    if(retry) {
-                        sendData(0);
-                    }
-                }
+                console.error(error);
+                // 🚀 當發生網路異常時，這是一個保險提示
+                alert("🔴 網路不穩定！\n請先檢查試算表是否已扣款，\n若無扣款，請點擊『重新掃描』後再試一次。");
             } finally {
                 btn.innerText = "確認交易";
                 btn.disabled = false;
+                cancelBtn.disabled = false;
             }
         }
     </script>
