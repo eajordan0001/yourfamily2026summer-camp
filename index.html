@@ -10,20 +10,18 @@
         .container { background: white; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #ddd; background: #000; }
         #result-section { display: none; }
-        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; }
+        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 2px solid #eee; border-radius: 10px; }
         .name-txt { font-size: 24px; font-weight: bold; color: #e6007e; }
         .balance-txt { font-size: 32px; font-weight: bold; }
-        
         input[type="number"] { width: 80%; padding: 10px; font-size: 28px; margin: 10px 0; text-align: center; border: 2px solid #ccc; border-radius: 8px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 10px 0; }
         .btn-small { padding: 10px 0; font-size: 16px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; background: white; font-weight: bold; }
-        
         .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 15px 0; }
         .btn-item { padding: 10px 2px; font-size: 13px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 5px; font-weight: bold; }
         .btn-item.active { background: #e6007e; color: white; border-color: #e6007e; }
-        
         .btn-main { width: 100%; padding: 15px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #6c757d; margin-top: 15px; width: 100%; padding: 12px; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        .err-hint { color: red; font-size: 12px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -38,6 +36,7 @@
             <div class="info-display">
                 學員：<span id="display-name" class="name-txt">讀取中...</span><br>
                 目前餘額：<span id="display-balance" class="balance-txt">---</span>
+                <div id="err-text" class="err-hint"></div>
             </div>
             
             <input type="number" id="amount" value="0" inputmode="numeric">
@@ -76,13 +75,16 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
+        const scriptURL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
         let scanner, globalId = "", isBusy = false, tid = "";
 
         function startScan() {
             isBusy = false;
+            globalId = ""; // 🚀 重置 ID
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
+            document.getElementById('err-text').innerText = "";
+
             if (!scanner) scanner = new Html5Qrcode("reader");
             
             scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
@@ -93,20 +95,23 @@
                 document.getElementById('reader-container').style.display = 'none';
                 document.getElementById('result-section').style.display = 'block';
                 scanner.stop().then(() => fetchData());
-            }).catch(err => console.error(err));
+            }).catch(e => console.error(e));
         }
 
         async function fetchData() {
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
+                // 🚀 增加快取清除機制，修復 Load Failed
+                const finalURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&timestamp=${Date.now()}`;
+                const res = await fetch(finalURL);
+                if (!res.ok) throw new Error("網路請求遭攔截");
                 const data = await res.json();
                 if (data.status === "success") {
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
                 } else { throw new Error(data.message); }
             } catch (e) {
-                alert("錯誤：" + e.message);
-                resetUI();
+                document.getElementById('display-name').innerText = "失敗";
+                document.getElementById('err-text').innerText = "連線異常：" + e.message;
             }
         }
 
@@ -118,14 +123,14 @@
             btn.innerText = "寫入中..."; btn.disabled = true;
 
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(note)}`);
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(note)}&t=${Date.now()}`);
                 const data = await res.json();
                 if (data.status === "success") {
-                    alert(`✅ 成功！\n學員：${data.name}\n新餘額：${data.newBalance}`);
+                    alert(`✅ 交易完成！\n學員：${data.name}\n新餘額：${data.newBalance}`);
                     resetUI();
                 } else { alert("錯誤：" + data.message); resetBtn(); }
             } catch (e) {
-                alert("網路異常，請稍後再試。");
+                alert("🔴 伺服器忙碌中，請確認試算表紀錄。");
                 resetBtn();
             }
         }
