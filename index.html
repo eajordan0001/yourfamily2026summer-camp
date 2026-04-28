@@ -3,54 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>優兒行動銀行 v2.6</title>
+    <title>優兒行動銀行 v2.7 - 終極穩定版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { --brand-pink: #e6007e; --brand-cyan: #00bfff; }
+        :root { --brand-pink: #e6007e; --brand-cyan: #00bfff; --success: #28a745; }
         body { font-family: -apple-system, sans-serif; text-align: center; margin: 0; background: var(--brand-pink); color: white; min-height: 100vh; }
-        .main-container { padding: 20px 10px; }
+        .main-container { padding: env(safe-area-inset-top) 10px 20px; }
         #reader { width: 90%; max-width: 350px; margin: 0 auto; border-radius: 20px; border: 5px solid white !important; display: none; overflow: hidden; }
-        #result-section { display: none; padding: 20px; background: white; border-radius: 30px; color: #333; margin: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #eee; }
-        .name { font-size: 28px; font-weight: bold; color: var(--brand-pink); }
-        .balance { font-size: 45px; font-weight: 900; color: #000; margin: 5px 0; }
-        input[type="number"] { padding: 10px; font-size: 38px; width: 80%; border-radius: 15px; border: 3px solid #333; text-align: center; margin-bottom: 10px; }
+        #result-section { display: none; padding: 20px; background: white; border-radius: 30px; color: #333; margin: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .info-box { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #eee; }
+        .name { font-size: 32px; font-weight: bold; color: var(--brand-pink); }
+        .balance { font-size: 50px; font-weight: 900; color: #000; margin: 5px 0; }
+        input[type="number"] { padding: 10px; font-size: 42px; width: 85%; border-radius: 15px; border: 4px solid #333; text-align: center; margin: 10px 0; font-weight: bold; }
         
-        .section-title { text-align: left; font-size: 14px; color: #666; margin: 10px 0 5px 5px; font-weight: bold; }
+        .section-title { text-align: left; font-size: 14px; color: #666; margin: 15px 0 8px 10px; font-weight: bold; border-left: 4px solid var(--brand-pink); padding-left: 8px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn-small { padding: 15px 0; font-size: 18px; border-radius: 10px; border: 1px solid #ddd; background: white; font-weight: bold; }
+        .btn-small { padding: 15px 0; font-size: 20px; border-radius: 12px; border: 1px solid #ccc; background: white; font-weight: bold; }
         
-        /* 項目按鈕網格 - 調整為三格一排 */
+        /* 12 個項目按鈕網格 */
         .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-        .btn-item { padding: 12px 0; background: #eee; border-radius: 10px; border: 1px solid #ccc; font-size: 13px; font-weight: bold; cursor: pointer; color: #444; }
-        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
+        .btn-item { padding: 12px 2px; background: #f0f0f0; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; font-weight: bold; cursor: pointer; color: #444; }
+        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); box-shadow: 0 4px 8px rgba(230,0,126,0.3); }
         
-        .btn-main { padding: 18px; width: 100%; border-radius: 20px; border: none; font-size: 22px; font-weight: bold; cursor: pointer; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--brand-pink); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        .btn-main { padding: 20px; width: 100%; border-radius: 25px; border: none; font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-confirm { background: var(--success); color: white; }
+        .btn-confirm:active { transform: scale(0.98); }
+        .btn-retry { background: #888; color: white; font-size: 16px; margin-top: 15px; }
+
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--brand-pink); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <h2>💰 優兒行動銀行</h2>
+        <h2 id="main-header">💰 優兒銀行系統</h2>
         <div id="reader-container">
             <div id="reader"></div>
-            <div id="logo-box" style="margin-top:40px;">
-                <img src="./logo.png" style="width:70%;">
-                <button onclick="startScan()" style="display:block; margin:30px auto; padding:20px 50px; font-size:24px; border-radius:50px; background:var(--brand-cyan); color:white; border:none; font-weight:bold;">啟動掃描器</button>
+            <div id="logo-box" style="margin-top:50px;">
+                <img src="./logo.png" style="width:70%; max-width:300px;">
+                <button onclick="startScan()" style="display:block; margin:40px auto; padding:22px 60px; font-size:26px; border-radius:60px; background:var(--brand-cyan); color:white; border:none; font-weight:bold; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">啟動掃描</button>
             </div>
         </div>
 
         <div id="result-section">
             <div class="info-box">
-                <div id="display-name" class="name">讀取中...</div>
+                <div id="display-name" class="name">載入中...</div>
                 <div id="display-balance" class="balance">---</div>
-                <div id="status-msg" style="font-size:11px; color: #999;"></div>
+                <div id="status-msg" style="font-size:12px; color: #888;">正在同步雲端資料...</div>
             </div>
             
             <input type="number" id="amount" value="0" inputmode="numeric">
             
-            <div class="section-title">金額快速調整</div>
+            <div class="section-title">快速調整金額</div>
             <div class="btn-grid">
                 <button class="btn-small" style="color:green" onclick="adj(1)">+1</button>
                 <button class="btn-small" style="color:green" onclick="adj(5)">+5</button>
@@ -62,7 +66,7 @@
                 <button class="btn-small" style="color:red" onclick="adj(-50)">-50</button>
             </div>
 
-            <div class="section-title">交易項目 (點擊選擇)</div>
+            <div class="section-title">選擇交易項目 (必選)</div>
             <div class="item-grid">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">🍪 餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">🧃 飲料</button>
@@ -79,12 +83,13 @@
             </div>
             <input type="hidden" id="note" value="餅乾">
             
-            <button id="ok-btn" class="btn-main" style="background:#28a745; color:white;" onclick="doTrade()">確認扣款</button>
-            <button class="btn-main" style="background:#888; color:white; margin-top:15px; font-size:16px;" onclick="location.reload()">重新掃描</button>
+            <button id="ok-btn" class="btn-main btn-confirm" onclick="doTrade()">確認送出交易</button>
+            <button class="btn-main btn-retry" onclick="location.reload()">取消 / 重新掃描</button>
         </div>
     </div>
 
     <script>
+        // 請確保此處的 URL 是您最新的部署網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec";
         let scanner, globalId = "", isBusy = false, tid = "";
 
@@ -92,16 +97,18 @@
             document.getElementById('logo-box').style.display = 'none';
             document.getElementById('reader').style.display = 'block';
             scanner = new Html5Qrcode("reader");
-            scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScan).catch(() => alert("啟動相機失敗"));
+            scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScan).catch(() => alert("無法啟動相機"));
         }
 
         function onScan(text) {
             if (isBusy) return;
             isBusy = true;
             globalId = text.trim();
-            tid = "T" + Date.now();
+            tid = "T" + Date.now() + Math.floor(Math.random()*100);
+            
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
+            document.getElementById('main-header').innerText = "交易明細確認";
             if(scanner) scanner.stop();
             fetchData();
         }
@@ -109,42 +116,56 @@
         async function fetchData(retry = 0) {
             const nameEl = document.getElementById('display-name');
             const msgEl = document.getElementById('status-msg');
-            msgEl.innerHTML = `<div class="loader"></div> 資料同步中...`;
+            msgEl.innerHTML = `<div class="loader"></div> 正在連線 Google 伺服器...`;
 
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
+                // 使用長超時配置 (15秒)
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`, { signal: controller.signal });
                 const data = await res.json();
+                
+                clearTimeout(timeout);
+
                 if (data.status === "success") {
                     nameEl.innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
-                    msgEl.innerHTML = "✅ 連線正常";
-                } else { throw new Error(); }
+                    msgEl.innerHTML = "✅ 資料已同步";
+                } else { throw new Error(data.message); }
+
             } catch (e) {
-                if (retry < 2) {
-                    setTimeout(() => fetchData(retry + 1), 1500);
+                if (retry < 3) { // 🚀 提高重試次數至 3 次
+                    msgEl.innerHTML = `<div class="loader"></div> 連線不穩，第 ${retry+1} 次重試...`;
+                    setTimeout(() => fetchData(retry + 1), 1000);
                 } else {
-                    nameEl.innerHTML = `<span onclick="location.reload()" style="color:red; text-decoration:underline; cursor:pointer;">讀取失敗 (重試)</span>`;
-                    msgEl.innerText = "⚠️ 網路異常，請刷新頁面";
+                    nameEl.innerHTML = `<span onclick="fetchData()" style="color:red; text-decoration:underline; cursor:pointer;">讀取失敗 (點此重試)</span>`;
+                    msgEl.innerText = "❌ 錯誤：網路超時或找不到學員 ID";
                 }
             }
         }
 
         async function doTrade() {
             const amt = document.getElementById('amount').value;
-            if (amt == 0) return alert("請輸入金額");
+            if (amt == 0) return alert("請輸入交易金額");
+            
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "⏳ 處理中..."; btn.disabled = true;
+            btn.innerText = "⏳ 寫入試算表中..."; 
+            btn.disabled = true;
 
             try {
-                const noteValue = document.getElementById('note').value;
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(noteValue)}`);
+                const noteVal = document.getElementById('note').value;
+                const finalURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(noteVal)}`;
+                
+                const res = await fetch(finalURL);
                 const data = await res.json();
+                
                 if (data.status === "success") {
                     alert(`✅ 交易完成！\n學員：${data.name}\n新餘額：${data.newBalance}`);
                     location.reload();
                 } else { alert("❌ 失敗：" + data.message); resetBtn(); }
             } catch (e) {
-                alert("🔴 網路不穩！請檢查後台 Log 是否已寫入。");
+                alert("🔴 網路發生問題！請檢查後台 Log 紀錄，勿重複扣款。");
                 resetBtn();
             }
         }
@@ -157,7 +178,8 @@
         }
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認扣款"; btn.disabled = false;
+            btn.innerText = "確認送出交易"; 
+            btn.disabled = false;
         }
     </script>
 </body>
