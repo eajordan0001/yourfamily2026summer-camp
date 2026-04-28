@@ -13,9 +13,11 @@
         .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; }
         .name-txt { font-size: 24px; font-weight: bold; color: #e6007e; }
         .balance-txt { font-size: 32px; font-weight: bold; }
-        input[type="number"] { width: 80%; padding: 10px; font-size: 28px; margin: 10px 0; text-align: center; border: 2px solid #ccc; border-radius: 8px; }
+        /* 💡 加強手動輸入框的視覺提示 */
+        input[type="number"] { width: 85%; padding: 12px; font-size: 32px; margin: 10px 0; text-align: center; border: 3px solid #e6007e; border-radius: 10px; outline: none; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 10px 0; }
-        .btn-small { padding: 10px 0; font-size: 16px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; background: white; font-weight: bold; }
+        .btn-small { padding: 12px 0; font-size: 16px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; background: white; font-weight: bold; }
+        .btn-small:active { background: #f0f0f0; }
         .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 15px 0; }
         .btn-item { padding: 10px 2px; font-size: 13px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 5px; font-weight: bold; }
         .btn-item.active { background: #e6007e; color: white; border-color: #e6007e; }
@@ -37,7 +39,7 @@
                 目前餘額：<span id="display-balance" class="balance-txt">---</span>
             </div>
             
-            <input type="number" id="amount" value="0" inputmode="numeric">
+            <input type="number" id="amount" value="0" placeholder="輸入金額">
             
             <div class="btn-grid">
                 <button class="btn-small" onclick="adj(1)">+1</button>
@@ -73,38 +75,27 @@
     </div>
 
     <script>
-        // 🚀 您的專屬部署網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         let scanner, globalId = "", isBusy = false;
 
         function startScan() {
             isBusy = false;
-            globalId = ""; // 清空 ID，防止跨學員錯誤
+            globalId = ""; 
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
             if (!scanner) scanner = new Html5Qrcode("reader");
-            
-            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess)
-            .catch(e => console.error("相機啟動錯誤:", e));
+            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess).catch(e => console.error(e));
         }
 
         function onScanSuccess(text) {
             if (isBusy) return;
             isBusy = true;
-            globalId = text.trim().toUpperCase(); // 立即更新為新學員 ID
-            
-            // 重置 UI
+            globalId = text.trim().toUpperCase();
             document.getElementById('amount').value = "0";
-            const btns = document.querySelectorAll('.btn-item');
-            btns.forEach(b => b.classList.remove('active'));
-            btns[0].classList.add('active');
-            document.getElementById('note').value = btns[0].innerText;
             document.getElementById('display-name').innerText = "讀取中...";
             document.getElementById('display-balance').innerText = "---";
-
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            
             scanner.stop().then(() => fetchData());
         }
 
@@ -116,15 +107,13 @@
                     document.getElementById('display-name').innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
                 } else { throw new Error(data.message); }
-            } catch (e) {
-                alert("資料讀取失敗：" + e.message);
-                resetUI();
-            }
+            } catch (e) { alert("讀取失敗：" + e.message); resetUI(); }
         }
 
         async function doTrade() {
+            // 讀取目前輸入框數值 (包含手動修改後的)
             const amt = document.getElementById('amount').value;
-            if (amt == 0) return alert("請輸入金額");
+            if (amt == 0 && !confirm("金額為 0，確定要執行嗎？")) return;
             
             const btn = document.getElementById('ok-btn');
             const note = document.getElementById('note').value;
@@ -132,29 +121,22 @@
             btn.disabled = true;
 
             try {
-                // 再次確保交易時發送的是目前的 globalId
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(note)}&t=${Date.now()}`);
                 const data = await res.json();
-                
                 if (data.status === "success") {
                     alert(`✅ 交易完成！\n學員：${data.name}\n新餘額：${data.newBalance}`);
-                    resetUI(); // 交易完後直接重啟掃描
-                } else { 
-                    alert("錯誤：" + data.message); 
-                    resetBtn(); 
-                }
-            } catch (e) {
-                alert("連線異常，請檢查網路或試算表紀錄。");
-                resetBtn();
-            }
+                    resetUI();
+                } else { alert("錯誤：" + data.message); resetBtn(); }
+            } catch (e) { alert("連線異常。"); resetBtn(); }
         }
 
-        function resetUI() {
-            resetBtn();
-            startScan();
+        function resetUI() { resetBtn(); startScan(); }
+        
+        // 🚀 修改加減邏輯：直接與輸入框數值累加
+        function adj(v) { 
+            let cur = parseFloat(document.getElementById('amount').value) || 0;
+            document.getElementById('amount').value = cur + v; 
         }
-
-        function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
         
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
@@ -167,7 +149,6 @@
             btn.innerText = "確認加值/扣款"; 
             btn.disabled = false;
         }
-
         window.onload = startScan;
     </script>
 </body>
