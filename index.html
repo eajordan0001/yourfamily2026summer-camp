@@ -10,7 +10,7 @@
         .container { background: white; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; border: 1px solid #ddd; background: #000; }
         #result-section { display: none; }
-        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 2px solid #eee; border-radius: 10px; }
+        .info-display { font-size: 18px; margin: 15px 0; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; }
         .name-txt { font-size: 24px; font-weight: bold; color: #e6007e; }
         .balance-txt { font-size: 32px; font-weight: bold; }
         input[type="number"] { width: 80%; padding: 10px; font-size: 28px; margin: 10px 0; text-align: center; border: 2px solid #ccc; border-radius: 8px; }
@@ -51,7 +51,7 @@
             </div>
 
             <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
-            <div class="item-grid" id="item-box">
+            <div class="item-grid">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">飲料</button>
                 <button class="btn-item" onclick="setN(this, '其他')">其他</button>
@@ -73,30 +73,27 @@
     </div>
 
     <script>
-        // 🚀 已更新為您的最新部署網址
+        // 🚀 您的專屬部署網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec"; 
         let scanner, globalId = "", isBusy = false;
 
         function startScan() {
             isBusy = false;
-            globalId = ""; // 每次啟動掃描前確保 ID 為空
+            globalId = ""; // 清空 ID，防止跨學員錯誤
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
             if (!scanner) scanner = new Html5Qrcode("reader");
             
             scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess)
-            .catch(e => console.error(e));
+            .catch(e => console.error("相機啟動錯誤:", e));
         }
 
         function onScanSuccess(text) {
             if (isBusy) return;
             isBusy = true;
+            globalId = text.trim().toUpperCase(); // 立即更新為新學員 ID
             
-            // 🚀 關鍵修復：立即更新 globalId，防止殘留上一位學員的資料
-            globalId = text.trim();
-            console.log("掃描成功，目前 ID:", globalId);
-
-            // 重置介面數值
+            // 重置 UI
             document.getElementById('amount').value = "0";
             const btns = document.querySelectorAll('.btn-item');
             btns.forEach(b => b.classList.remove('active'));
@@ -108,13 +105,11 @@
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
             
-            // 停止掃描並獲取資料
             scanner.stop().then(() => fetchData());
         }
 
         async function fetchData() {
             try {
-                // 增加時間戳記確保不讀取快取
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
                 const data = await res.json();
                 if (data.status === "success") {
@@ -122,7 +117,7 @@
                     document.getElementById('display-balance').innerText = data.balance;
                 } else { throw new Error(data.message); }
             } catch (e) {
-                alert("讀取失敗：" + e.message);
+                alert("資料讀取失敗：" + e.message);
                 resetUI();
             }
         }
@@ -133,25 +128,23 @@
             
             const btn = document.getElementById('ok-btn');
             const note = document.getElementById('note').value;
-            
-            // 鎖定按鈕，防止重複點擊
-            btn.innerText = "寫入中..."; 
+            btn.innerText = "處理中..."; 
             btn.disabled = true;
 
             try {
-                // 再次確保使用當前的 globalId
+                // 再次確保交易時發送的是目前的 globalId
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(note)}&t=${Date.now()}`);
                 const data = await res.json();
                 
                 if (data.status === "success") {
                     alert(`✅ 交易完成！\n學員：${data.name}\n新餘額：${data.newBalance}`);
-                    resetUI();
+                    resetUI(); // 交易完後直接重啟掃描
                 } else { 
                     alert("錯誤：" + data.message); 
                     resetBtn(); 
                 }
             } catch (e) {
-                alert("網路異常，請確認試算表紀錄。");
+                alert("連線異常，請檢查網路或試算表紀錄。");
                 resetBtn();
             }
         }
@@ -162,16 +155,19 @@
         }
 
         function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
+        
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
+
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
             btn.innerText = "確認加值/扣款"; 
             btn.disabled = false;
         }
+
         window.onload = startScan;
     </script>
 </body>
