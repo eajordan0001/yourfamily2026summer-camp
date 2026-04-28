@@ -7,83 +7,47 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { 
+            /* 使用與 Logo 一致的飽滿桃紅色 */
             --brand-pink: #e6007e; 
             --brand-pink-dark: #c0006a;
-            --primary: #007bff; 
             --success: #28a745; 
             --danger: #dc3545; 
             --gray: #6c757d;   
             --light-gray: #f8f9fa;
-            --card-white: rgba(255, 255, 255, 0.94);
+            
+            /* 背景全部統一為桃紅色 */
+            --bg-color: #e6007e; 
+            --card-white: rgba(255, 255, 255, 0.98);
         }
 
         body { 
             font-family: -apple-system, sans-serif; 
             text-align: center; 
             padding: 10px; 
+            background-color: var(--bg-color); /* 統一背景色 */
             margin: 0; 
             color: #333;
-            /* 背景照片 */
-            background-image: url('https://i.postimg.cc/N0mCKrBX/IMG-9279.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
             min-height: 100vh;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255, 255, 255, 0.2); /* 輕微提亮背景以利閱讀 */
-            z-index: -1;
         }
 
         h2 { 
             margin: 20px 0; 
             color: white; 
             font-size: 24px; 
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
         }
 
-        /* 掃描區塊 */
-        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; display: flex; flex-direction: column; align-items: center; }
+        /* 掃描區域 */
+        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; }
         #reader { 
             width: 100%; 
             border-radius: 25px; 
             overflow: hidden; 
             background: #000; 
             border: 6px solid white !important; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
         }
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
-
-        /* 啟動按鈕 */
-        #start-btn { 
-            padding: 22px 60px; 
-            font-size: 26px; 
-            font-weight: bold; 
-            background-color: var(--brand-pink); 
-            color: white; 
-            border: none; 
-            border-radius: 60px; 
-            cursor: pointer; 
-            margin: 40px auto 20px auto; /* 縮小間距，留位置給下方照片 */
-            display: block; 
-            box-shadow: 0 10px 30px rgba(230,0,126,0.5); 
-            z-index: 10;
-        }
-
-        /* 新增：按鈕下方的正常比例照片 */
-        .decoration-img {
-            width: 85%;
-            max-width: 320px;
-            border-radius: 20px;
-            border: 5px solid white;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-        }
 
         /* 交易介面卡片 */
         #result-section { 
@@ -91,7 +55,7 @@
             padding: 20px; 
             background-color: var(--card-white);
             border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
             margin: 10px; 
             animation: fadeIn 0.2s ease; 
         }
@@ -102,33 +66,61 @@
         .balance { font-size: 42px; font-weight: 900; color: #000; }
         .id-badge { font-size: 13px; color: #999; margin-bottom: 5px; }
 
+        /* 黑框手動輸入區 */
         .input-wrapper { margin: 15px 0; }
         input[type="number"] { 
             padding: 15px; 
             font-size: 38px; 
             width: 85%; 
             border-radius: 18px; 
-            border: 3px solid #333; 
+            border: 3px solid #000; /* 強調黑框 */
             text-align: center; 
             font-weight: bold; 
             outline: none;
-            background: white;
         }
         
         .section-title { text-align: left; font-size: 15px; color: #555; margin: 15px 0 8px 10px; font-weight: bold; }
 
-        .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: bold; }
-        .btn-plus { color: var(--success); border-bottom: 3px solid #e1e1e1; }
-        .btn-minus { color: var(--danger); border-bottom: 3px solid #e1e1e1; }
+        /* 紅框快捷金額 (2列4欄) */
+        .btn-grid-8 { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+        .btn-small { 
+            padding: 15px 2px; 
+            font-size: 18px; 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            border-radius: 15px; 
+            font-weight: bold; 
+        }
+        .btn-plus { color: var(--success); }
+        .btn-minus { color: var(--danger); }
 
         .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .btn-category { background: var(--light-gray); color: #444; border-radius: 12px; border: 1px solid #ddd; }
-        .btn-category.active { background: var(--brand-pink) !important; color: white !important; border: 1px solid var(--brand-pink-dark); }
+        .btn-category { background: var(--light-gray); color: #444; border-radius: 12px; }
+        .btn-category.active { background: var(--brand-pink) !important; color: white !important; }
         
         button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
-        .btn-confirm { background: var(--success); color: white; box-shadow: 0 6px 20px rgba(40,167,69,0.3); }
+        .btn-confirm { background: var(--success); color: white; }
         .btn-cancel { background: var(--gray); color: white; margin-top: 20px; font-size: 16px; border-radius: 15px; }
+
+        /* 啟動按鈕 */
+        #start-btn { 
+            padding: 22px 60px; 
+            font-size: 26px; 
+            font-weight: bold; 
+            background-color: white; 
+            color: var(--brand-pink); 
+            border: none; 
+            border-radius: 60px; 
+            cursor: pointer; 
+            margin: 80px auto; 
+            display: block; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+        }
     </style>
 </head>
 <body>
@@ -138,7 +130,6 @@
     <div id="reader-container">
         <div id="reader"></div>
         <button id="start-btn" onclick="requestPermission()">啟動鏡頭</button>
-        <img id="deco-img" src="https://i.postimg.cc/N0mCKrBX/IMG-9279.jpg" class="decoration-img" alt="夏令營照片">
     </div>
     
     <div id="result-section">
@@ -185,17 +176,11 @@
 
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
-            const decoImg = document.getElementById('deco-img');
             if(startBtn) startBtn.style.display = 'none';
-            if(decoImg) decoImg.style.display = 'none'; // 啟動後隱藏裝飾圖
-
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .catch(() => { 
-                if(startBtn) startBtn.style.display = 'block'; 
-                if(decoImg) decoImg.style.display = 'block';
-            });
+            .catch(() => { if(startBtn) startBtn.style.display = 'block'; });
         }
 
         function onScanSuccess(decodedText) {
@@ -225,7 +210,6 @@
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('main-title').style.display = 'block';
-            // 如果是在初始掃描頁面，不顯示 decoImg 以免遮擋畫面
         }
 
         function addVal(v) {
