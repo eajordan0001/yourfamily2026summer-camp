@@ -6,76 +6,53 @@
     <title>優兒夏令營行動銀行 Pro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { 
-            --brand-pink: #e6007e; --brand-cyan: #00bfff;
-            --success: #28a745; --danger: #dc3545;
-            --text-on-pink: #ffffff; --text-on-glass: #333333;
-        }
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; text-align: center; 
-            margin: 0; background-color: var(--brand-pink); color: var(--text-on-pink);
-            min-height: 100vh; display: flex; flex-direction: column; position: relative;
-        }
-        body::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('./logo.png?v=1'); background-size: 80% auto;
-            opacity: 0.15; z-index: 0; pointer-events: none;
-        }
-        .main-container { position: relative; z-index: 1; flex: 1; padding: env(safe-area-inset-top) 15px 20px; }
-        h2 { margin: 25px 0 10px; font-size: 26px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .header-sep { width: 90%; height: 4px; background: white; border-radius: 2px; margin: 0 auto 30px; }
-
-        #reader-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        #reader { width: 85%; max-width: 350px; border-radius: 25px; overflow: hidden; background: #000; border: 6px solid white !important; display: none; }
-        
-        #result-section { display: none; padding: 20px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 30px; color: var(--text-on-glass); margin-bottom: 20px; }
-        
-        .info-box { background: rgba(0,0,0,0.03); padding: 12px; border-radius: 20px; margin-bottom: 15px; }
-        .name { font-size: 28px; font-weight: bold; color: var(--brand-pink); margin-bottom: 5px; min-height: 40px; }
+        :root { --brand-pink: #e6007e; --brand-cyan: #00bfff; --success: #28a745; --danger: #dc3545; }
+        body { font-family: -apple-system, sans-serif; text-align: center; margin: 0; background: var(--brand-pink); color: white; min-height: 100vh; }
+        .main-container { padding: 20px 15px; position: relative; z-index: 1; }
+        #reader { width: 85%; max-width: 350px; border-radius: 25px; margin: 0 auto; background: #000; border: 6px solid white !important; display: none; }
+        #result-section { display: none; padding: 20px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-radius: 30px; color: #333; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .info-box { background: #f9f9f9; padding: 12px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #eee; }
+        .name { font-size: 28px; font-weight: bold; color: var(--brand-pink); }
         .balance { font-size: 42px; font-weight: 900; color: #000; }
-        .status-tag { font-size: 12px; padding: 4px 10px; border-radius: 10px; background: #eee; color: #666; margin-top: 5px; display: inline-block; }
-
-        input[type="number"] { padding: 12px; font-size: 38px; width: 85%; border-radius: 18px; border: 4px solid #333; text-align: center; font-weight: 900; margin: 10px 0; }
-        .section-title { text-align: left; font-size: 14px; color: #555; margin: 12px 0 6px 10px; font-weight: bold; }
+        input[type="number"] { padding: 10px; font-size: 36px; width: 85%; border-radius: 18px; border: 4px solid #333; text-align: center; font-weight: 900; margin: 10px 0; }
+        .section-title { text-align: left; font-size: 14px; color: #666; margin: 10px 0 5px 10px; font-weight: bold; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: 800; cursor: pointer; }
-        .btn-item { background: #f0f0f0; border-radius: 12px; font-size: 14px; padding: 12px 2px; border: 1px solid #ddd; font-weight: bold; cursor: pointer; }
-        .btn-item.active { background: var(--brand-pink) !important; color: white !important; }
+        .btn-small { padding: 12px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 12px; font-weight: bold; }
         
-        button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; cursor: pointer; }
-        .btn-confirm { background: var(--success); color: white; }
-        .btn-confirm:disabled { background: #bbb; }
-        .btn-cancel { background: rgba(0,0,0,0.5); color: white; margin-top: 15px; font-size: 16px; border-radius: 15px; padding: 10px; border: none; }
-
-        #start-btn { padding: 22px 60px; font-size: 26px; font-weight: bold; background: var(--brand-cyan); color: white; border: none; border-radius: 60px; margin: 40px auto; display: block; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--brand-pink); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; margin-right: 5px; }
+        /* 品項按鈕改為 3 欄排列，方便容納 12 個品項 */
+        .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .btn-item { background: #eee; border-radius: 12px; font-size: 13px; padding: 12px 2px; border: 1px solid #ccc; font-weight: bold; color: #444; }
+        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
+        
+        button.main { padding: 18px; font-size: 22px; font-weight: bold; border-radius: 20px; border: none; width: 100%; cursor: pointer; }
+        .btn-confirm { background: var(--success); color: white; margin-top: 10px; }
+        .btn-cancel { background: #666; color: white; font-size: 16px; margin-top: 12px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--brand-pink); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
     <div class="main-container">
-        <h2 id="main-title">💰 優兒夏令營行動銀行</h2>
-        <div id="header-sep" class="header-sep"></div>
+        <h2 id="title">💰 優兒行動銀行</h2>
         <div id="reader-container">
             <div id="reader"></div>
-            <div id="logo-display">
-                <img src="./logo.png?v=1" alt="Logo" style="width:90%; max-width:380px;">
-                <button id="start-btn" onclick="requestPermission()">啟動鏡頭</button>
+            <div id="logo-display" style="margin-top:40px;">
+                <img src="./logo.png?v=1" style="width:75%; max-width:300px;">
+                <button onclick="requestPermission()" style="padding:18px 45px; font-size:22px; border-radius:50px; border:none; background:var(--brand-cyan); color:white; margin-top:30px; font-weight:bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">啟動掃描</button>
             </div>
         </div>
-        
+
         <div id="result-section">
             <div class="info-box">
-                <div id="display-name" class="name">讀取中...</div>
-                <div style="font-size: 13px; color: #777;">ID: <span id="display-id">---</span></div>
-                <div style="font-size: 14px; color: #666; margin-top: 8px;">目前餘額</div>
+                <div id="display-name" class="name">載入中...</div>
+                <div style="font-size: 14px; color: #888;">目前餘額</div>
                 <div id="display-balance" class="balance">---</div>
-                <div id="status-container"></div>
+                <div id="status-text" style="font-size:12px; color:#888; margin-top:5px;"></div>
             </div>
             
             <input type="number" id="amount" value="0" inputmode="numeric">
-            <div class="section-title">快速金額</div>
+            
+            <div class="section-title">快速增減</div>
             <div class="btn-grid">
                 <button class="btn-small" style="color:var(--success)" onclick="addVal(1)">+1</button>
                 <button class="btn-small" style="color:var(--success)" onclick="addVal(5)">+5</button>
@@ -87,25 +64,25 @@
                 <button class="btn-small" style="color:var(--danger)" onclick="addVal(-50)">-50</button>
             </div>
 
-            <div class="section-title">項目</div>
-            <div class="btn-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="section-title">交易項目</div>
+            <div class="item-grid">
                 <button class="btn-item" onclick="setNote(this, '餅乾')">🍪 餅乾</button>
                 <button class="btn-item" onclick="setNote(this, '飲料')">🧃 飲料</button>
                 <button class="btn-item" onclick="setNote(this, '其他')">❓ 其他</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留1</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留2</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留3</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留4</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留5</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留6</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留7</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留8</button>
-                <button class="btn-item" onclick="setNote(this, '其他')">預留9</button>
+                <button class="btn-item" onclick="setNote(this, '預留1')">預留1</button>
+                <button class="btn-item" onclick="setNote(this, '預留2')">預留2</button>
+                <button class="btn-item" onclick="setNote(this, '預留3')">預留3</button>
+                <button class="btn-item" onclick="setNote(this, '預留4')">預留4</button>
+                <button class="btn-item" onclick="setNote(this, '預留5')">預留5</button>
+                <button class="btn-item" onclick="setNote(this, '預留6')">預留6</button>
+                <button class="btn-item" onclick="setNote(this, '預留7')">預留7</button>
+                <button class="btn-item" onclick="setNote(this, '預留8')">預留8</button>
+                <button class="btn-item" onclick="setNote(this, '預留9')">預留9</button>
             </div>
             <input type="hidden" id="note" value="一般交易">
             
             <button id="send-btn" class="main btn-confirm" onclick="sendData()">確認交易</button>
-            <button id="cancel-btn" class="main btn-cancel" onclick="resumeScanner()">取消重掃</button>
+            <button class="main btn-cancel" onclick="resumeScanner()">取消重掃</button>
         </div>
     </div>
 
@@ -117,103 +94,73 @@
             document.getElementById('logo-display').style.display = 'none';
             document.getElementById('reader').style.display = 'block';
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 220 }, onScanSuccess).catch(() => alert("相機啟動失敗"));
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 220 }, onScanSuccess);
         }
 
-        function onScanSuccess(decodedText) {
-            if (isPaused) return;
-            isPaused = true;
-            if (navigator.vibrate) navigator.vibrate(80);
-            globalId = decodedText.trim();
-            currentTid = "TID" + Date.now() + Math.floor(Math.random()*1000);
-
+        function onScanSuccess(text) {
+            if (isPaused) return; isPaused = true;
+            globalId = text.trim();
+            currentTid = "TID" + Date.now();
             document.getElementById('reader-container').style.display = 'none';
-            document.getElementById('main-title').style.display = 'none';
-            document.getElementById('header-sep').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            document.getElementById('display-id').innerText = globalId;
+            document.getElementById('display-name').innerText = "讀取中...";
             document.getElementById('amount').value = 0;
             if(html5QrCode) html5QrCode.pause();
-
             fetchBalance();
         }
 
-        // 🚀 核心優化：帶有自動重試機制的查詢
-        async function fetchBalance(retryCount = 0) {
+        async function fetchBalance(retry = 0) {
+            const statusEl = document.getElementById('status-text');
+            statusEl.innerHTML = `<div class="loader"></div> 資料同步中...`;
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); 
-            updateStatus("fetch", retryCount > 0 ? `連線重試中(${retryCount})...` : "同步伺服器資料...");
-
+            const id = setTimeout(() => controller.abort(), 12000);
             try {
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`, { signal: controller.signal });
                 const data = await res.json();
                 document.getElementById('display-name').innerText = data.name || "未命名";
                 document.getElementById('display-balance').innerText = data.balance ?? "0";
-                updateStatus("success", "連線正常");
-            } catch (err) {
-                if (retryCount < 2) {
-                    setTimeout(() => fetchBalance(retryCount + 1), 1500);
-                } else {
-                    updateStatus("error", "網路極慢");
-                    document.getElementById('display-name').innerHTML = `<span onclick="fetchBalance()" style="text-decoration:underline; color:red;">查詢失敗 (點擊重試)</span>`;
+                statusEl.innerHTML = "✅ 連線正常";
+            } catch (e) {
+                if (retry < 2) setTimeout(() => fetchBalance(retry + 1), 1500);
+                else {
+                    statusEl.innerHTML = "⚠️ 網路不穩";
+                    document.getElementById('display-name').innerHTML = `<span onclick="fetchBalance()" style="text-decoration:underline;color:red;cursor:pointer;">查詢失敗 (重試)</span>`;
                 }
-            } finally { clearTimeout(timeoutId); }
+            } finally { clearTimeout(id); }
         }
 
-        function updateStatus(type, msg) {
-            const container = document.getElementById('status-container');
-            if (type === "fetch") container.innerHTML = `<div class="status-tag"><div class="loader"></div>${msg}</div>`;
-            else if (type === "error") container.innerHTML = `<div class="status-tag" style="background:#ffdada;color:#d00;">⚠️ ${msg}</div>`;
-            else container.innerHTML = `<div class="status-tag">✅ ${msg}</div>`;
+        async function sendData() {
+            const amt = document.getElementById('amount').value;
+            if (amt == 0) return alert("請輸入金額");
+            const btn = document.getElementById('send-btn');
+            btn.innerText = "⏳ 處理中..."; btn.disabled = true;
+            try {
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(document.getElementById('note').value)}&tid=${currentTid}`);
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert(`✅ 成功！\n學員：${data.name}\n餘額：${data.newBalance}`);
+                    resumeScanner();
+                } else { alert("❌ 失敗：" + data.message); resetUI(); }
+            } catch (e) {
+                alert("🔴 網路逾時！請先檢查試算表，若沒紀錄再重試。");
+                resetUI();
+            }
         }
 
         function resumeScanner() {
             isPaused = false;
             document.getElementById('result-section').style.display = 'none';
-            document.getElementById('main-title').style.display = 'block';
-            document.getElementById('header-sep').style.display = 'block';
             document.getElementById('reader-container').style.display = 'block';
-            requestPermission();
             if(html5QrCode) html5QrCode.resume();
+            requestPermission();
         }
-
         function addVal(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
-        function setNote(btn, n) { 
-            document.querySelectorAll('.btn-item').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
+        function setNote(btn, n) {
+            document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active'); 
             document.getElementById('note').value = n;
         }
-
-        async function sendData() {
-            const amountVal = document.getElementById('amount').value;
-            if(amountVal == 0) return alert("請輸入金額");
-            
-            const btn = document.getElementById('send-btn');
-            btn.innerText = "⏳ 交易處理中...";
-            btn.disabled = true;
-
-            const fullURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(document.getElementById('note').value)}&tid=${currentTid}`;
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-                const response = await fetch(fullURL, { method: 'GET', signal: controller.signal });
-                const data = await response.json();
-                if(data.status === "success") {
-                    alert(`✅ 交易完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
-                    resumeScanner();
-                } else { alert("❌ 錯誤：" + data.message); resetUI(); }
-            } catch (error) {
-                alert("🔴 網路逾時！\n請先檢查試算表，若無紀錄請按取消後重掃。");
-                resetUI();
-            }
-        }
-
-        function resetUI() {
-            const btn = document.getElementById('send-btn');
-            btn.innerText = "確認交易";
-            btn.disabled = false;
-        }
+        function resetUI() { const btn = document.getElementById('send-btn'); btn.innerText = "確認交易"; btn.disabled = false; }
     </script>
 </body>
 </html>
