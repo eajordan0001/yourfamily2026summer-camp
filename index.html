@@ -6,31 +6,91 @@
     <title>優兒夏令營行動銀行 Pro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --gray: #6c757d; --light-gray: #e9ecef; }
-        body { font-family: -apple-system, sans-serif; text-align: center; padding: 10px; background: #f0f2f5; margin: 0; overflow-x: hidden; }
-        h2 { margin: 15px 0; color: #1a1a1a; font-size: 22px; }
+        /* 1. 全局設定：背景色換成淡桃紅色 */
+        :root { 
+            --primary: #007bff; /* 啟動按鈕顏色 */
+            --primary-dark: #0056b3;
+            --success: #28a745; /* 確認按鈕顏色 */
+            --danger: #dc3545; /* 負數快捷鍵顏色 */
+            --gray: #6c757d;   /* 取消按鈕顏色 */
+            --light-gray: #e9ecef; /* 分類按鈕未選顏色 */
+            
+            /* 優化：將純白改為帶有淡淡透明度的卡片白，並參考 Logo 背景色設定全局背景 */
+            --card-white: rgba(255, 255, 255, 0.95);
+            --bg-color: #f7e0e5; /* 淡桃紅色背景 */
+        }
 
-        /* 掃描容器 */
-        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; position: relative; }
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; border: 4px solid white !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        body { 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif; 
+            text-align: center; 
+            padding: 10px; 
+            background-color: var(--bg-color); /* 應用淡桃紅色 */
+            margin: 0; 
+            overflow-x: hidden; 
+            color: #333;
+        }
+
+        /* 2. 標題與視覺優化 */
+        h2 { 
+            margin: 20px 0; 
+            color: #1a1a1a; 
+            font-size: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 3. 掃描容器：控制大小與圓角 */
+        #reader-container { 
+            width: 90%; 
+            max-width: 400px; 
+            margin: 20px auto; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #reader { 
+            width: 100%; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            background: #000; 
+            border: 5px solid white !important; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            min-height: 250px;
+        }
+        
+        /* 隱藏套件內建按鈕與文字 */
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
 
-        /* 交易介面 */
-        #result-section { display: none; padding: 15px; background: white; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 10px; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* 4. 結果交易介面：初始隱藏 */
+        #result-section { 
+            display: none; 
+            padding: 20px; 
+            background-color: var(--card-white); /* 柔和白 */
+            border-radius: 30px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            margin: 15px; 
+            animation: fadeIn 0.3s ease; 
+        }
 
-        .info-box { background: #f8f9fa; padding: 12px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #eee; }
-        .name { font-size: 26px; font-weight: bold; color: var(--primary); margin-bottom: 2px; }
-        .balance { font-size: 34px; font-weight: 900; color: #333; }
-        .id-badge { font-size: 11px; color: #aaa; margin-bottom: 5px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 黑框區：手動輸入框優化 */
-        .input-wrapper { margin: 10px 0; }
+        /* 資訊區塊樣式 */
+        .info-box { background: #f8f9fa; padding: 18px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #eee; }
+        .name { font-size: 30px; font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .balance { font-size: 40px; font-weight: 900; color: #000; }
+        .id-badge { font-size: 13px; color: #999; margin: 5px 0; }
+
+        /* 手動輸入框樣式 */
+        .input-wrapper { margin: 15px 0; }
         input[type="number"] { 
-            padding: 12px; 
-            font-size: 36px; 
+            padding: 15px; 
+            font-size: 38px; 
             width: 85%; 
-            border-radius: 15px; 
+            border-radius: 18px; 
             border: 2px solid var(--primary); 
             text-align: center; 
             font-weight: bold; 
@@ -39,43 +99,69 @@
             outline: none;
         }
         
-        .section-title { text-align: left; font-size: 13px; color: #777; margin: 10px 0 5px 8px; font-weight: bold; }
+        .section-title { text-align: left; font-size: 15px; color: #666; margin: 15px 0 5px 8px; font-weight: bold; }
 
-        /* 紅框區：2列4欄佈局 */
-        .btn-grid-8 { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
-            margin-bottom: 15px; 
-        }
+        /* 金額增減 2列4欄佈局 */
+        .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 24%); gap: 8px; margin-bottom: 20px; justify-content: center;}
         
-        /* 交易分類佈局 */
-        .btn-grid-3 { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; 
-            margin-bottom: 15px; 
-        }
+        /* 分類按鈕 3欄佈局 */
+        .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 30%); gap: 10px; margin-bottom: 20px; justify-content: center;}
 
         .btn-small { 
-            padding: 12px 2px; 
-            font-size: 16px; 
+            padding: 15px 2px; 
+            font-size: 18px; 
             background: #fff; 
             border: 1px solid #ddd; 
-            border-radius: 10px; 
+            border-radius: 15px; 
             font-weight: bold; 
             transition: 0.1s;
         }
-        .btn-small:active { background: #eee; transform: scale(0.92); }
+        .btn-small:active { background: #eee; transform: scale(0.95); }
         
-        .btn-category { background: var(--light-gray); color: #444; border: 2px solid transparent; font-size: 14px; }
-        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: #0056b3; }
+        .btn-category { background: var(--light-gray); color: #495057; border: 2px solid transparent; font-size: 16px; }
+        .btn-category.active { background: var(--primary) !important; color: white !important; border-color: var(--primary-dark); }
         
-        button.main { padding: 18px; font-size: 22px; font-weight: bold; border-radius: 18px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
-        .btn-confirm { background: var(--success); color: white; }
-        .btn-cancel { background: var(--gray); color: white; margin-top: 10px; font-size: 16px; padding: 12px; }
+        /* 主確認按鈕優化 */
+        button.main { 
+            padding: 20px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            border-radius: 20px; 
+            border: none; 
+            width: 100%; 
+            margin-top: 5px; 
+            cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+        .btn-confirm { background-color: var(--success); color: white; }
+        .btn-confirm:active { background-color: #218838; transform: scale(0.98); }
 
-        #start-btn { padding: 20px 50px; font-size: 22px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin: 60px auto; display: block; }
+        .btn-cancel { 
+            background-color: var(--gray); 
+            color: white; 
+            margin-top: 20px; 
+            font-size: 16px; 
+            padding: 15px; 
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 5. 啟動按鈕優化：更有圓潤感與桃紅背景呼應 */
+        #start-btn { 
+            padding: 22px 60px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 60px; 
+            cursor: pointer; 
+            margin: 70px auto; 
+            display: block; 
+            box-shadow: 0 10px 25px rgba(0,123,255,0.4); 
+            transition: 0.2s;
+        }
+        #start-btn:active { background-color: var(--primary-dark); transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -91,7 +177,7 @@
         <div class="info-box">
             <div id="display-name" class="name">載入中...</div>
             <div class="id-badge">學員 ID: <span id="display-id">---</span></div>
-            <div style="font-size: 13px; color: #888;">目前餘額</div>
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">目前餘額</div>
             <div id="display-balance" class="balance">---</div>
         </div>
         
@@ -124,88 +210,144 @@
     </div>
 
     <script>
+        // 請確保此處為您正確的 Apps Script 後端網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec"; 
+        
         let html5QrCode;
         let globalId = ""; 
-        let isPaused = false;
+        let isPaused = false; // 用於連續掃描邏輯，防止交易中重複觸發
 
+        // 啟動相機 (開啟鏡頭)
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
             if(startBtn) startBtn.style.display = 'none';
+
+            // 如果掃描器已存在，直接啟動即可
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            
+            // 效能優化：設定穩定 FPS 且固定 qrbox 大小，提高辨識率與流暢度
             const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
+
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .catch(() => { if(startBtn) startBtn.style.display = 'block'; });
+            .catch(err => {
+                // 如果失敗（例如用戶拒絕權限），將按鈕秀回去
+                console.error("相機啟動失敗", err);
+                if(startBtn) startBtn.style.display = 'block';
+            });
         }
 
+        // 掃描成功的回呼 (暴力換頁邏輯)
         function onScanSuccess(decodedText) {
-            if (isPaused) return;
-            isPaused = true;
-            if (navigator.vibrate) navigator.vibrate(80);
-            globalId = decodedText.trim();
+            // 如果目前處於暫停狀態（例如交易畫面中），則忽略掃描結果
+            if (isPaused) return; 
+            
+            isPaused = true; // 進入暫停模式
+            if (navigator.vibrate) navigator.vibrate(80); // 震動回饋
+            
+            globalId = decodedText.trim(); // 儲存學員 ID
 
+            // 暴力換頁：瞬間隱藏掃描區域，顯示交易介面
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('main-title').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
             
+            // 初始化 UI 文字與重置金額
             document.getElementById('display-id').innerText = globalId;
-            document.getElementById('display-name').innerText = "讀取中...";
+            document.getElementById('display-name').innerText = "載入中...";
+            document.getElementById('display-balance').innerText = "---";
             document.getElementById('amount').value = 0;
 
-            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
+            // 核心優化：相機不用「stop」，讓它在背景持續運行，
+            // 這樣在處理下一筆時可以毫秒級回歸。
+            
+            // 在背景發送 fetch 查詢餘額
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`, {
+                method: 'GET',
+                mode: 'cors'
+            })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('display-name').innerText = data.name || "查無此人";
-                document.getElementById('display-balance').innerText = data.balance ?? "---";
+                if(data.name || data.status === "info" || data.status === "success") {
+                    document.getElementById('display-name').innerText = data.name || "未命名學員";
+                    document.getElementById('display-balance').innerText = data.balance !== undefined ? data.balance : "0";
+                } else {
+                    document.getElementById('display-name').innerText = "非系統學員";
+                    document.getElementById('display-balance').innerText = "N/A";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('display-name').innerText = "網路連線失敗";
             });
         }
 
+        // 🚀 連續掃描核心：恢復掃描狀態
+        // 按下「取消」或「交易成功彈窗」後會呼叫此函式。
         function resumeScanner() {
-            isPaused = false;
+            isPaused = false; // 恢復接受掃描結果
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('main-title').style.display = 'block';
+            // 不需重複呼叫 html5QrCode.start，因為它一直都在背景運作。
         }
 
-        // 金額增減邏輯
+        // 金額快捷鍵增減邏輯 (支援黑框手動輸入後的加減)
         function addVal(v) {
             const input = document.getElementById('amount');
-            // 確保原本沒數字時也能計算
             let current = parseInt(input.value);
-            if (isNaN(current)) current = 0;
+            // 如果原本輸入框內容是非數字，初始化為 0
+            if (isNaN(current)) current = 0; 
             input.value = current + v;
         }
 
+        // 交易項目分類選擇邏輯
         function setNote(btn, n) {
+            // 清除原本選中的active樣式
             document.querySelectorAll('.btn-category').forEach(el => el.classList.remove('active'));
+            // 將目前選中的按鈕變色
             btn.classList.add('active');
+            // 將選中的名稱填入隱藏的 input
             document.getElementById('note').value = n;
         }
 
+        // 送出交易請求
         function sendData() {
             const amountVal = document.getElementById('amount').value;
             const noteVal = document.getElementById('note').value;
             
-            if(amountVal == 0 || amountVal == "") return alert("請輸入或點選金額");
+            if(amountVal == 0 || amountVal == "") return alert("請點選快捷金額或手動輸入金額");
+            if(!globalId) return alert("遺失學員 ID，請重掃");
 
             const btn = document.getElementById('send-btn');
-            btn.innerText = "寫入資料中..."; btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "寫入資料中..."; 
+            btn.disabled = true;
 
-            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`)
+            // 送出 fetch POST/GET 請求到 Apps Script
+            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`, {
+                method: 'GET',
+                mode: 'cors'
+            })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
-                    alert(`✅ 成功！\n餘額變動：${amountVal}\n剩餘金額：${data.newBalance}`);
-                    btn.innerText = "確認交易"; btn.disabled = false;
+                    // 交易完成彈窗提示
+                    alert(`✅ 交易完成！\n學員：${data.name}\n變動：${amountVal}\n餘額：${data.newBalance}`);
+                    // 按下彈窗「確定」後，自動回歸相機掃描畫面，秒速準備掃描下一位學生
+                    btn.disabled = false;
+                    btn.innerText = originalText;
                     resumeScanner();
                 } else {
-                    alert("失敗：" + data.message);
-                    btn.innerText = "確認交易"; btn.disabled = false;
+                    alert("失敗：" + (data.message || "未知錯誤"));
+                    btn.disabled = false;
+                    btn.innerText = originalText;
                 }
             })
-            .catch(() => {
-                alert("網路異常，請再試一次");
-                btn.innerText = "確認交易"; btn.disabled = false;
+            .catch(err => {
+                console.error(err);
+                alert("伺服器回應異常，請檢查網路狀態或後台權限");
+                btn.disabled = false;
+                btn.innerText = originalText;
             });
         }
     </script>
