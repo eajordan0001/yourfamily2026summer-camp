@@ -3,36 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>優兒行動銀行 v2.9 - 完整項目版</title>
+    <title>優兒行動銀行 v3.0 - 穩定修復版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { --brand-pink: #e6007e; --brand-cyan: #00bfff; --success: #28a745; --gray: #888; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; margin: 0; background: var(--brand-pink); color: white; min-height: 100vh; }
         .main-container { padding: env(safe-area-inset-top) 15px 30px; }
-        
         #reader { width: 100%; max-width: 350px; margin: 0 auto; border-radius: 20px; border: 5px solid white !important; display: none; overflow: hidden; background: #000; }
-        
         #result-section { display: none; padding: 25px 15px; background: white; border-radius: 30px; color: #333; margin: 15px 5px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
         .info-box { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 2px solid #eee; }
         .name { font-size: 28px; font-weight: bold; color: var(--brand-pink); }
         .balance { font-size: 45px; font-weight: 900; color: #000; margin: 5px 0; }
-        
         input[type="number"] { padding: 12px; font-size: 40px; width: 80%; border-radius: 15px; border: 4px solid #333; text-align: center; margin: 10px 0; font-weight: bold; }
-        
         .section-title { text-align: left; font-size: 14px; color: #666; margin: 20px 0 10px 5px; font-weight: bold; border-left: 4px solid var(--brand-pink); padding-left: 10px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn-small { padding: 12px 0; font-size: 18px; border-radius: 12px; border: 1px solid #ddd; background: #fff; font-weight: bold; cursor: pointer; }
-
-        /* 12 個項目的網格優化 */
         .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 25px; }
-        .btn-item { padding: 12px 1px; background: #f8f8f8; border-radius: 10px; border: 1px solid #ddd; font-size: 13px; font-weight: bold; cursor: pointer; color: #555; transition: 0.2s; white-space: nowrap; }
-        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); box-shadow: 0 4px 10px rgba(230,0,126,0.2); }
-
+        .btn-item { padding: 12px 1px; background: #f8f8f8; border-radius: 10px; border: 1px solid #ddd; font-size: 13px; font-weight: bold; cursor: pointer; color: #555; }
+        .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
         .btn-main { padding: 18px; width: 100%; border-radius: 50px; border: none; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-confirm { background: var(--success); color: white; }
         .btn-confirm:disabled { background: #ccc; filter: grayscale(1); cursor: not-allowed; }
         .btn-retry { background: #f0f0f0; color: #666; font-size: 16px; margin-top: 15px; }
-
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--brand-pink); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -40,13 +32,10 @@
 <body>
     <div class="main-container">
         <h2 id="main-header">💰 優兒銀行系統</h2>
-        
         <div id="reader-container">
             <div id="reader"></div>
             <div id="logo-box" style="margin-top:40px;">
-                <div style="background:white; width:120px; height:120px; border-radius:30px; margin:0 auto 30px; display:flex; align-items:center; justify-content:center;">
-                   <span style="font-size:60px;">🏦</span>
-                </div>
+                <div style="background:white; width:120px; height:120px; border-radius:30px; margin:0 auto 30px; display:flex; align-items:center; justify-content:center;"><span style="font-size:60px;">🏦</span></div>
                 <button onclick="startScan()" style="display:block; margin:30px auto; padding:20px 50px; font-size:24px; border-radius:50px; background:var(--brand-cyan); color:white; border:none; font-weight:bold; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">啟動掃描</button>
             </div>
         </div>
@@ -57,10 +46,8 @@
                 <div id="display-balance" class="balance">---</div>
                 <div id="status-msg" style="font-size:13px; color: var(--gray);">正在同步雲端資料...</div>
             </div>
-            
             <div class="section-title">輸入交易金額</div>
             <input type="number" id="amount" value="0" inputmode="numeric" min="0">
-            
             <div class="btn-grid">
                 <button class="btn-small" style="color:green" onclick="adj(1)">+1</button>
                 <button class="btn-small" style="color:green" onclick="adj(5)">+5</button>
@@ -71,8 +58,7 @@
                 <button class="btn-small" style="color:red" onclick="adj(-10)">-10</button>
                 <button class="btn-small" style="color:red" onclick="adj(-50)">-50</button>
             </div>
-
-            <div class="section-title">選擇交易項目 (共 12 項)</div>
+            <div class="section-title">選擇交易項目</div>
             <div class="item-grid">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">🍪 餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">🧃 飲料</button>
@@ -88,13 +74,13 @@
                 <button class="btn-item" onclick="setN(this, '預留6')">💠 預留6</button>
             </div>
             <input type="hidden" id="note" value="餅乾">
-            
             <button id="ok-btn" class="btn-main btn-confirm" onclick="doTrade()" disabled>等待資料同步...</button>
             <button class="btn-main btn-retry" onclick="location.reload()">取消 / 重新掃描</button>
         </div>
     </div>
 
     <script>
+        // 🚀 務必更換成你最新部署的網址
         const scriptURL = "https://script.google.com/macros/s/AKfycbx61w5SchKA2-CUpBs3QBCOS79u5CoPy7yZMTzbiLJo-MySiAn_O-96DGuC68bJs1Pz/exec";
         let scanner, globalId = "", isBusy = false, tid = "";
 
@@ -105,9 +91,7 @@
                 document.getElementById('reader').style.display = 'block';
                 scanner = new Html5Qrcode("reader");
                 await scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScan);
-            } catch (err) {
-                alert("無法啟動相機，請檢查權限設定。");
-            }
+            } catch (err) { alert("無法啟動相機"); }
         }
 
         function onScan(text) {
@@ -117,7 +101,7 @@
             tid = "T" + Date.now() + Math.floor(Math.random() * 1000);
             document.getElementById('reader-container').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            if(scanner) scanner.stop();
+            if(scanner) scanner.stop().catch(() => {});
             fetchData();
         }
 
@@ -125,11 +109,19 @@
             const nameEl = document.getElementById('display-name');
             const msgEl = document.getElementById('status-msg');
             const okBtn = document.getElementById('ok-btn');
-            msgEl.innerHTML = `<div class="loader"></div> 正在連線伺服器...`;
+            msgEl.innerHTML = `<div class="loader"></div> 正在同步雲端資料...`;
             
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`);
+                // 🚀 修復讀取失敗的關鍵：加上 mode: 'cors' 與 redirect: 'follow'
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&t=${Date.now()}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
+                
+                if (!res.ok) throw new Error("網路請求異常");
                 const data = await res.json();
+
                 if (data.status === "success") {
                     nameEl.innerText = data.name;
                     document.getElementById('display-balance').innerText = data.balance;
@@ -138,10 +130,11 @@
                     okBtn.disabled = false;
                 } else { throw new Error(data.message); }
             } catch (e) {
-                if (retry < 2) setTimeout(() => fetchData(retry + 1), 1500);
-                else {
-                    nameEl.innerHTML = `<span onclick="location.reload()" style="color:red;">讀取失敗</span>`;
-                    msgEl.innerText = "❌ 錯誤：請重新掃描";
+                if (retry < 2) {
+                    setTimeout(() => fetchData(retry + 1), 1500);
+                } else {
+                    nameEl.innerHTML = `<span onclick="location.reload()" style="color:red; text-decoration:underline;">讀取失敗 (請刷新)</span>`;
+                    msgEl.innerText = "❌ 錯誤：" + e.message;
                 }
             }
         }
@@ -150,8 +143,7 @@
             const amt = parseInt(document.getElementById('amount').value) || 0;
             const noteVal = document.getElementById('note').value;
             const userName = document.getElementById('display-name').innerText;
-
-            if (amt <= 0) return alert("請輸入金額");
+            if (amt <= 0) return alert("請輸入有效金額");
             if (!confirm(`確定要為 ${userName} 處理 [${noteVal}] 交易共 ${amt} 元嗎？`)) return;
 
             const btn = document.getElementById('ok-btn');
@@ -159,14 +151,18 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(noteVal)}`);
+                const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(noteVal)}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
                 const data = await res.json();
                 if (data.status === "success") {
                     alert(`✅ 交易完成！\n新餘額：${data.newBalance}`);
                     location.reload();
                 } else { alert("❌ 失敗：" + data.message); resetBtn(); }
             } catch (e) {
-                alert("🔴 網路異常，請檢查試算表紀錄以免重複扣款。");
+                alert("🔴 網路異常，請確認試算表紀錄。");
                 resetBtn();
             }
         }
@@ -175,13 +171,11 @@
             const el = document.getElementById('amount');
             el.value = Math.max(0, (parseInt(el.value) || 0) + v);
         }
-
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
-
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
             btn.innerText = "確認送出交易"; 
