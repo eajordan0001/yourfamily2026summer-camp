@@ -16,7 +16,6 @@
             --text-on-glass: #333333;
         }
 
-        /* 沉浸式全螢幕背景 */
         body { 
             font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif; 
             text-align: center; 
@@ -31,7 +30,6 @@
             position: relative;
         }
 
-        /* 背景浮水印 */
         body::before {
             content: "";
             position: absolute;
@@ -104,7 +102,6 @@
             filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
         }
 
-        /* 玻璃擬態交易卡片 */
         #result-section { 
             display: none;
             padding: 20px; 
@@ -248,18 +245,15 @@
 
             if(html5QrCode) html5QrCode.pause();
 
+            // 查詢餘額也加入簡易錯誤處理
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
-            .then(res => {
-                if (!res.ok) throw new Error('伺服器回應錯誤');
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
                 document.getElementById('display-name').innerText = data.name || "未命名";
                 document.getElementById('display-balance').innerText = data.balance ?? "0";
             })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('display-name').innerText = "查詢超時";
+            .catch(() => {
+                document.getElementById('display-name').innerText = "連線緩慢...";
             });
         }
 
@@ -286,42 +280,55 @@
             document.getElementById('note').value = n;
         }
 
-        // 🚀 核心 Bug 修正：優化交易寫入邏輯
-        async function sendData() {
+        // 🚀 強化版發送邏輯：增加自動重試與優化超時處理
+        async function sendData(retryCount = 0) {
             const amountVal = document.getElementById('amount').value;
             if(amountVal == 0 || amountVal == "") return alert("請輸入金額");
             
             const btn = document.getElementById('send-btn');
             const noteVal = document.getElementById('note').value;
             
-            btn.innerText = "連線中..."; btn.disabled = true;
+            btn.innerText = retryCount > 0 ? `重試中(${retryCount})...` : "連線中...";
+            btn.disabled = true;
 
             const fullURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`;
 
             try {
-                // 使用 fetch 並增加更完整的連線處理
+                // 使用 AbortController 增加自定義超時限制（15秒）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
                 const response = await fetch(fullURL, {
-                    method: 'GET', // GAS 多半使用 GET 觸發 doGet
-                    mode: 'cors'
+                    method: 'GET',
+                    mode: 'cors',
+                    signal: controller.signal
                 });
 
-                if (!response.ok) throw new Error('Network response was not ok');
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error('伺服器回應異常');
 
                 const data = await response.json();
 
                 if(data.status === "success") {
-                    alert(`✅ 完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
+                    alert(`✅ 交易完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
                     resumeScanner();
                 } else {
-                    alert("⚠️ 交易失敗：" + (data.message || "未知原因"));
+                    alert("⚠️ 失敗：" + (data.message || "未知錯誤"));
                 }
             } catch (error) {
                 console.error('Fetch Error:', error);
-                // 🚀 當發生網路異常時，給老師一個「手動檢查」或「重試」的選項，而不是直接死機
-                const retry = confirm("連線稍微不穩定，是否要重新嘗試發送？");
-                if(retry) {
-                    sendData();
-                    return;
+                
+                // 如果自動重試次數少於 1 次，則自動再發送一次
+                if (retryCount < 1) {
+                    console.log("自動嘗試重新發送...");
+                    sendData(retryCount + 1);
+                } else {
+                    // 真的不行的話，才跳出手動確認
+                    const retry = confirm("目前網路訊號不佳，是否要再次嘗試發送交易？");
+                    if(retry) {
+                        sendData(0);
+                    }
                 }
             } finally {
                 btn.innerText = "確認交易";
