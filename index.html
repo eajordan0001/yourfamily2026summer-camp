@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { 
-            /* 調整為 Logo 的飽滿桃紅色 */
             --brand-pink: #e6007e; 
             --brand-pink-dark: #c0006a;
             --primary: #007bff; 
@@ -16,25 +15,39 @@
             --gray: #6c757d;   
             --light-gray: #f8f9fa;
             
-            /* 背景與卡片顏色 */
-            --bg-color: #e6007e; /* 整個背景直接用桃紅色 */
-            --card-white: rgba(255, 255, 255, 0.98);
+            /* 背景卡片調整：稍微增加透明度，讓背景照片隱約透出 */
+            --card-white: rgba(255, 255, 255, 0.94);
         }
 
         body { 
             font-family: -apple-system, sans-serif; 
             text-align: center; 
             padding: 10px; 
-            background-color: var(--bg-color); /* 應用強烈的桃紅背景 */
             margin: 0; 
             color: #333;
+            /* 設定背景照片 */
+            background-image: url('https://i.postimg.cc/N0mCKrBX/IMG-9279.jpg');
+            background-size: cover;      /* 確保照片填滿螢幕 */
+            background-position: center; /* 確保照片置中 */
+            background-attachment: fixed; /* 捲動時背景固定，不卡頓 */
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        /* 加一層半透明遮罩，確保文字在任何背景圖下都清晰 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.15); /* 輕微壓暗背景 */
+            z-index: -1;
         }
 
         h2 { 
             margin: 20px 0; 
-            color: white; /* 標題改白色，在桃紅背景下才清楚 */
+            color: white; 
             font-size: 24px; 
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5); /* 加強標題陰影 */
         }
 
         /* 掃描容器 */
@@ -45,7 +58,7 @@
             overflow: hidden; 
             background: #000; 
             border: 6px solid white !important; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
         }
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
 
@@ -55,7 +68,7 @@
             padding: 20px; 
             background-color: var(--card-white);
             border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
             margin: 10px; 
             animation: fadeIn 0.2s ease; 
         }
@@ -73,54 +86,42 @@
             font-size: 38px; 
             width: 85%; 
             border-radius: 18px; 
-            border: 3px solid #333; /* 顯眼的黑框 */
+            border: 3px solid #333; 
             text-align: center; 
             font-weight: bold; 
             outline: none;
+            background: white;
         }
         
         .section-title { text-align: left; font-size: 15px; color: #555; margin: 15px 0 8px 10px; font-weight: bold; }
 
         /* 快捷金額 (紅框區：2列4欄) */
-        .btn-grid-8 { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            margin-bottom: 20px; 
-        }
-        .btn-small { 
-            padding: 15px 2px; 
-            font-size: 18px; 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            border-radius: 15px; 
-            font-weight: bold; 
-        }
-        /* 讓加號按鈕帶一點桃紅感 */
+        .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: bold; }
         .btn-plus { color: var(--success); border-bottom: 3px solid #e1e1e1; }
         .btn-minus { color: var(--danger); border-bottom: 3px solid #e1e1e1; }
 
         .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .btn-category { background: var(--light-gray); color: #444; border-radius: 12px; }
-        .btn-category.active { background: var(--brand-pink) !important; color: white !important; }
+        .btn-category { background: var(--light-gray); color: #444; border-radius: 12px; border: 1px solid #ddd; }
+        .btn-category.active { background: var(--brand-pink) !important; color: white !important; border: 1px solid var(--brand-pink-dark); }
         
         button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-confirm { background: var(--success); color: white; box-shadow: 0 6px 20px rgba(40,167,69,0.3); }
         .btn-cancel { background: var(--gray); color: white; margin-top: 20px; font-size: 16px; border-radius: 15px; }
 
-        /* 啟動按鈕：使用品牌色 */
+        /* 啟動按鈕 */
         #start-btn { 
             padding: 22px 60px; 
             font-size: 26px; 
             font-weight: bold; 
-            background-color: white; /* 在桃紅背景下，白色按鈕最顯眼 */
-            color: var(--brand-pink); 
+            background-color: var(--brand-pink); 
+            color: white; 
             border: none; 
             border-radius: 60px; 
             cursor: pointer; 
             margin: 80px auto; 
             display: block; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            box-shadow: 0 10px 30px rgba(230,0,126,0.5); 
         }
     </style>
 </head>
