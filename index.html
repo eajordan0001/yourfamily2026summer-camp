@@ -135,13 +135,11 @@
         
         .section-title { text-align: left; font-size: 15px; color: #555; margin: 12px 0 6px 10px; font-weight: bold; }
 
-        /* 金額快捷按鈕 (2列4欄) */
         .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
         .btn-plus { color: var(--success); }
         .btn-minus { color: var(--danger); }
 
-        /* 交易項目按鈕 (3列4欄) */
         .btn-grid-items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .btn-item { background: #eee; color: #444; border-radius: 12px; font-size: 14px; padding: 12px 2px; border: 1px solid #ddd; font-weight: bold; }
         .btn-item.active { background: var(--brand-pink) !important; color: white !important; border-color: var(--brand-pink); }
@@ -227,10 +225,7 @@
             document.getElementById('logo-display').style.display = 'none';
             document.getElementById('reader').style.display = 'block';
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-            
-            // 如果相機已經在跑了就不要重複啟動
             if (html5QrCode.getState() === 2) return;
-
             const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => console.error("相機啟動失敗", err));
@@ -251,29 +246,30 @@
             document.getElementById('display-name').innerText = "讀取中...";
             document.getElementById('amount').value = 0;
 
-            // 進入交易畫面時暫時停止掃描，但不關閉相機，以利稍後快速恢復
             if(html5QrCode) html5QrCode.pause();
 
             fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('伺服器回應錯誤');
+                return res.json();
+            })
             .then(data => {
                 document.getElementById('display-name').innerText = data.name || "未命名";
                 document.getElementById('display-balance').innerText = data.balance ?? "0";
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('display-name').innerText = "查詢超時";
             });
         }
 
-        // 🚀 修改後的 resumeScanner：直接自動重啟相機
         function resumeScanner() {
             isPaused = false;
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('main-title').style.display = 'block';
             document.getElementById('header-sep').style.display = 'block';
             document.getElementById('reader-container').style.display = 'block';
-            
-            // 直接呼叫啟動相機邏輯，略過 Logo 畫面
             requestPermission();
-            
-            // 如果剛才是用 pause()，這裡執行 resume()
             if(html5QrCode && html5QrCode.getState() === 3) {
                 html5QrCode.resume();
             }
@@ -290,24 +286,47 @@
             document.getElementById('note').value = n;
         }
 
-        function sendData() {
+        // 🚀 核心 Bug 修正：優化交易寫入邏輯
+        async function sendData() {
             const amountVal = document.getElementById('amount').value;
             if(amountVal == 0 || amountVal == "") return alert("請輸入金額");
+            
             const btn = document.getElementById('send-btn');
-            btn.innerText = "寫入中..."; btn.disabled = true;
+            const noteVal = document.getElementById('note').value;
+            
+            btn.innerText = "連線中..."; btn.disabled = true;
 
-            fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(document.getElementById('note').value)}`)
-            .then(res => res.json())
-            .then(data => {
+            const fullURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amountVal}&note=${encodeURIComponent(noteVal)}`;
+
+            try {
+                // 使用 fetch 並增加更完整的連線處理
+                const response = await fetch(fullURL, {
+                    method: 'GET', // GAS 多半使用 GET 觸發 doGet
+                    mode: 'cors'
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+
                 if(data.status === "success") {
-                    alert(`✅ 完成！\n學員：${data.name}\n變動：${amountVal}\n餘額：${data.newBalance}`);
+                    alert(`✅ 完成！\n學員：${data.name}\n餘額：${data.newBalance}`);
                     resumeScanner();
-                } else alert("失敗：" + data.message);
-                btn.innerText = "確認交易"; btn.disabled = false;
-            }).catch(() => {
-                alert("網路異常");
-                btn.innerText = "確認交易"; btn.disabled = false;
-            });
+                } else {
+                    alert("⚠️ 交易失敗：" + (data.message || "未知原因"));
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                // 🚀 當發生網路異常時，給老師一個「手動檢查」或「重試」的選項，而不是直接死機
+                const retry = confirm("連線稍微不穩定，是否要重新嘗試發送？");
+                if(retry) {
+                    sendData();
+                    return;
+                }
+            } finally {
+                btn.innerText = "確認交易";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
