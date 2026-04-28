@@ -24,13 +24,11 @@
         
         .btn-main { width: 100%; padding: 15px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #6c757d; margin-top: 15px; width: 100%; padding: 12px; color: white; border: none; border-radius: 10px; cursor: pointer; }
-        .err-msg { color: red; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2 style="color:#e6007e;">💰 優兒行動銀行</h2>
-        
         <div id="reader-container">
             <div id="reader"></div>
             <p id="scan-hint">請掃描學員 QR Code</p>
@@ -39,21 +37,20 @@
         <div id="result-section">
             <div class="info-display">
                 學員：<span id="display-name" class="name-txt">讀取中...</span><br>
-                餘額：<span id="display-balance" class="balance-txt">---</span>
-                <div id="msg-log" class="err-msg"></div>
+                目前餘額：<span id="display-balance" class="balance-txt">---</span>
             </div>
             
             <input type="number" id="amount" value="0" inputmode="numeric">
             
             <div class="btn-grid">
-                <button class="btn-small" style="color:green" onclick="adj(1)">+1</button>
-                <button class="btn-small" style="color:green" onclick="adj(5)">+5</button>
-                <button class="btn-small" style="color:green" onclick="adj(10)">+10</button>
-                <button class="btn-small" style="color:green" onclick="adj(50)">+50</button>
-                <button class="btn-small" style="color:red" onclick="adj(-1)">-1</button>
-                <button class="btn-small" style="color:red" onclick="adj(-5)">-5</button>
-                <button class="btn-small" style="color:red" onclick="adj(-10)">-10</button>
-                <button class="btn-small" style="color:red" onclick="adj(-50)">-50</button>
+                <button class="btn-small" onclick="adj(1)">+1</button>
+                <button class="btn-small" onclick="adj(5)">+5</button>
+                <button class="btn-small" onclick="adj(10)">+10</button>
+                <button class="btn-small" onclick="adj(50)">+50</button>
+                <button class="btn-small" onclick="adj(-1)">-1</button>
+                <button class="btn-small" onclick="adj(-5)">-5</button>
+                <button class="btn-small" onclick="adj(-10)">-10</button>
+                <button class="btn-small" onclick="adj(-50)">-50</button>
             </div>
 
             <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
@@ -79,49 +76,24 @@
     </div>
 
     <script>
-        // 您的 APPS SCRIPT 網址
-        const scriptURL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
+        const scriptURL = "https://script.google.com/macros/s/AKfycbxI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
         let scanner, globalId = "", isBusy = false, tid = "";
 
-        // 初始化掃描器
         function startScan() {
             isBusy = false;
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
+            if (!scanner) scanner = new Html5Qrcode("reader");
             
-            if (!scanner) {
-                scanner = new Html5Qrcode("reader");
-            }
-            
-            scanner.start(
-                { facingMode: "environment" }, 
-                { fps: 15, qrbox: 250 }, 
-                onScanSuccess
-            ).catch(err => {
-                document.getElementById('scan-hint').innerText = "相機啟動失敗，請確認權限";
-                console.error(err);
-            });
-        }
-
-        // 掃描成功處理
-        function onScanSuccess(text) {
-            if (isBusy) return;
-            isBusy = true;
-            globalId = text.trim();
-            tid = "T" + Date.now();
-            
-            // 切換 UI
-            document.getElementById('reader-container').style.display = 'none';
-            document.getElementById('result-section').style.display = 'block';
-            document.getElementById('display-name').innerText = "讀取中...";
-            document.getElementById('display-balance').innerText = "---";
-            document.getElementById('msg-log').innerText = "";
-            document.getElementById('amount').value = "0";
-
-            // 關閉相機 (節省效能)，但不需要重新整理頁面
-            scanner.stop().then(() => {
-                fetchData();
-            });
+            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
+                if (isBusy) return;
+                isBusy = true;
+                globalId = text.trim();
+                tid = "T" + Date.now();
+                document.getElementById('reader-container').style.display = 'none';
+                document.getElementById('result-section').style.display = 'block';
+                scanner.stop().then(() => fetchData());
+            }).catch(err => console.error(err));
         }
 
         async function fetchData() {
@@ -133,57 +105,47 @@
                     document.getElementById('display-balance').innerText = data.balance;
                 } else { throw new Error(data.message); }
             } catch (e) {
-                document.getElementById('display-name').innerText = "錯誤";
-                document.getElementById('msg-log').innerText = e.message || "網路連線失敗";
+                alert("錯誤：" + e.message);
+                resetUI();
             }
         }
 
         async function doTrade() {
             const amt = document.getElementById('amount').value;
             if (amt == 0) return alert("請輸入金額");
-            
             const btn = document.getElementById('ok-btn');
             const note = document.getElementById('note').value;
-            btn.innerText = "寫入中..."; 
-            btn.disabled = true;
+            btn.innerText = "寫入中..."; btn.disabled = true;
 
             try {
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&tid=${tid}&note=${encodeURIComponent(note)}`);
                 const data = await res.json();
                 if (data.status === "success") {
                     alert(`✅ 成功！\n學員：${data.name}\n新餘額：${data.newBalance}`);
-                    resetUI(); // 🚀 關鍵：交易成功後重置 UI 並開啟相機，不刷網頁
-                } else { 
-                    alert("錯誤：" + data.message); 
-                    resetBtn(); 
-                }
+                    resetUI();
+                } else { alert("錯誤：" + data.message); resetBtn(); }
             } catch (e) {
                 alert("網路異常，請稍後再試。");
                 resetBtn();
             }
         }
 
-        // 🚀 重置介面並重啟相機 (不再詢問權限)
         function resetUI() {
             resetBtn();
             startScan();
         }
 
         function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
-        
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
-
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認扣款"; 
-            btn.disabled = false;
+            btn.innerText = "確認扣款"; btn.disabled = false;
         }
 
-        // 頁面加載完成後自動啟動
         window.onload = startScan;
     </script>
 </body>
