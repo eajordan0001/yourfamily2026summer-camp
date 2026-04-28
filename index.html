@@ -53,7 +53,7 @@
             </div>
 
             <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
-            <div class="item-grid">
+            <div id="item-container" class="item-grid">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">飲料</button>
                 <button class="btn-item" onclick="setN(this, '其他')">其他</button>
@@ -80,7 +80,7 @@
 
         function startScan() {
             isBusy = false;
-            globalId = ""; // 🚀 重置 ID
+            globalId = ""; 
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('err-text').innerText = "";
@@ -92,18 +92,41 @@
                 isBusy = true;
                 globalId = text.trim();
                 tid = "T" + Date.now();
+                
+                // 🚀 關鍵優化：進入畫面時清空上次數據
+                clearInputData(); 
+                
                 document.getElementById('reader-container').style.display = 'none';
                 document.getElementById('result-section').style.display = 'block';
+                
                 scanner.stop().then(() => fetchData());
             }).catch(e => console.error(e));
         }
 
+        // 🚀 執行數據清理函數
+        function clearInputData() {
+            // 1. 金額歸零
+            document.getElementById('amount').value = "0";
+            
+            // 2. 姓名與餘額重置為讀取中狀態
+            document.getElementById('display-name').innerText = "讀取中...";
+            document.getElementById('display-balance').innerText = "---";
+            
+            // 3. 重置項目按鈕樣式
+            const buttons = document.querySelectorAll('.btn-item');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // 4. 恢復預設項目為「餅乾」
+            if (buttons.length > 0) {
+                buttons[0].classList.add('active'); // 預設選中第一個按鈕 (餅乾)
+                document.getElementById('note').value = buttons[0].innerText;
+            }
+        }
+
         async function fetchData() {
             try {
-                // 🚀 增加快取清除機制，修復 Load Failed
                 const finalURL = `${scriptURL}?id=${encodeURIComponent(globalId)}&amount=0&timestamp=${Date.now()}`;
                 const res = await fetch(finalURL);
-                if (!res.ok) throw new Error("網路請求遭攔截");
                 const data = await res.json();
                 if (data.status === "success") {
                     document.getElementById('display-name').innerText = data.name;
@@ -130,7 +153,7 @@
                     resetUI();
                 } else { alert("錯誤：" + data.message); resetBtn(); }
             } catch (e) {
-                alert("🔴 伺服器忙碌中，請確認試算表紀錄。");
+                alert("🔴 網路不穩，請確認試算表紀錄。");
                 resetBtn();
             }
         }
@@ -141,11 +164,13 @@
         }
 
         function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
+        
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
+
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
             btn.innerText = "確認扣款"; btn.disabled = false;
