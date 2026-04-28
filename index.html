@@ -14,8 +14,6 @@
             --danger: #dc3545; 
             --gray: #6c757d;   
             --light-gray: #f8f9fa;
-            
-            /* 背景卡片調整：稍微增加透明度，讓背景照片隱約透出 */
             --card-white: rgba(255, 255, 255, 0.94);
         }
 
@@ -25,21 +23,20 @@
             padding: 10px; 
             margin: 0; 
             color: #333;
-            /* 設定背景照片 */
+            /* 背景照片 */
             background-image: url('https://i.postimg.cc/N0mCKrBX/IMG-9279.jpg');
-            background-size: cover;      /* 確保照片填滿螢幕 */
-            background-position: center; /* 確保照片置中 */
-            background-attachment: fixed; /* 捲動時背景固定，不卡頓 */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             background-repeat: no-repeat;
             min-height: 100vh;
         }
 
-        /* 加一層半透明遮罩，確保文字在任何背景圖下都清晰 */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.15); /* 輕微壓暗背景 */
+            background: rgba(255, 255, 255, 0.2); /* 輕微提亮背景以利閱讀 */
             z-index: -1;
         }
 
@@ -47,11 +44,11 @@
             margin: 20px 0; 
             color: white; 
             font-size: 24px; 
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5); /* 加強標題陰影 */
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
         }
 
-        /* 掃描容器 */
-        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; }
+        /* 掃描區塊 */
+        #reader-container { width: 90%; max-width: 400px; margin: 10px auto; display: flex; flex-direction: column; align-items: center; }
         #reader { 
             width: 100%; 
             border-radius: 25px; 
@@ -61,6 +58,32 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
         }
         #reader__dashboard_section_csr, #reader__camera_selection, #reader img { display: none !important; }
+
+        /* 啟動按鈕 */
+        #start-btn { 
+            padding: 22px 60px; 
+            font-size: 26px; 
+            font-weight: bold; 
+            background-color: var(--brand-pink); 
+            color: white; 
+            border: none; 
+            border-radius: 60px; 
+            cursor: pointer; 
+            margin: 40px auto 20px auto; /* 縮小間距，留位置給下方照片 */
+            display: block; 
+            box-shadow: 0 10px 30px rgba(230,0,126,0.5); 
+            z-index: 10;
+        }
+
+        /* 新增：按鈕下方的正常比例照片 */
+        .decoration-img {
+            width: 85%;
+            max-width: 320px;
+            border-radius: 20px;
+            border: 5px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
 
         /* 交易介面卡片 */
         #result-section { 
@@ -79,7 +102,6 @@
         .balance { font-size: 42px; font-weight: 900; color: #000; }
         .id-badge { font-size: 13px; color: #999; margin-bottom: 5px; }
 
-        /* 手動輸入框 (黑框區) */
         .input-wrapper { margin: 15px 0; }
         input[type="number"] { 
             padding: 15px; 
@@ -95,7 +117,6 @@
         
         .section-title { text-align: left; font-size: 15px; color: #555; margin: 15px 0 8px 10px; font-weight: bold; }
 
-        /* 快捷金額 (紅框區：2列4欄) */
         .btn-grid-8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         .btn-small { padding: 15px 2px; font-size: 18px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-weight: bold; }
         .btn-plus { color: var(--success); border-bottom: 3px solid #e1e1e1; }
@@ -108,21 +129,6 @@
         button.main { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 22px; border: none; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-confirm { background: var(--success); color: white; box-shadow: 0 6px 20px rgba(40,167,69,0.3); }
         .btn-cancel { background: var(--gray); color: white; margin-top: 20px; font-size: 16px; border-radius: 15px; }
-
-        /* 啟動按鈕 */
-        #start-btn { 
-            padding: 22px 60px; 
-            font-size: 26px; 
-            font-weight: bold; 
-            background-color: var(--brand-pink); 
-            color: white; 
-            border: none; 
-            border-radius: 60px; 
-            cursor: pointer; 
-            margin: 80px auto; 
-            display: block; 
-            box-shadow: 0 10px 30px rgba(230,0,126,0.5); 
-        }
     </style>
 </head>
 <body>
@@ -132,6 +138,7 @@
     <div id="reader-container">
         <div id="reader"></div>
         <button id="start-btn" onclick="requestPermission()">啟動鏡頭</button>
+        <img id="deco-img" src="https://i.postimg.cc/N0mCKrBX/IMG-9279.jpg" class="decoration-img" alt="夏令營照片">
     </div>
     
     <div id="result-section">
@@ -178,11 +185,17 @@
 
         function requestPermission() {
             const startBtn = document.getElementById('start-btn');
+            const decoImg = document.getElementById('deco-img');
             if(startBtn) startBtn.style.display = 'none';
+            if(decoImg) decoImg.style.display = 'none'; // 啟動後隱藏裝飾圖
+
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 20, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .catch(() => { if(startBtn) startBtn.style.display = 'block'; });
+            .catch(() => { 
+                if(startBtn) startBtn.style.display = 'block'; 
+                if(decoImg) decoImg.style.display = 'block';
+            });
         }
 
         function onScanSuccess(decodedText) {
@@ -212,6 +225,7 @@
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('main-title').style.display = 'block';
+            // 如果是在初始掃描頁面，不顯示 decoImg 以免遮擋畫面
         }
 
         function addVal(v) {
