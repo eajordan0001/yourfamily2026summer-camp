@@ -67,7 +67,7 @@
             </div>
             <input type="hidden" id="note" value="餅乾">
             
-            <button id="ok-btn" class="btn-main" onclick="doTrade()">確認扣款</button>
+            <button id="ok-btn" class="btn-main" onclick="doTrade()">確認加值/扣款</button>
             <button class="btn-cancel" onclick="resetUI()">取消 / 重新掃描</button>
         </div>
     </div>
@@ -156,7 +156,7 @@
         }
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認扣款"; btn.disabled = false;
+            btn.innerText = "確認加值/扣款"; btn.disabled = false;
         }
         window.onload = startScan;
     </script>
