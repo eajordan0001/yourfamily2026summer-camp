@@ -26,9 +26,10 @@
 <body>
     <div class="container">
         <h2 style="color:#e6007e;">💰 優兒行動銀行</h2>
+        
         <div id="reader-container">
             <div id="reader"></div>
-            <p>請掃描學員 QR Code</p>
+            <p id="scan-hint">請掃描學員 QR Code</p>
         </div>
 
         <div id="result-section">
@@ -51,7 +52,7 @@
             </div>
 
             <div style="text-align: left; font-size: 14px; font-weight: bold;">交易項目：</div>
-            <div id="item-grid" class="item-grid">
+            <div class="item-grid" id="item-box">
                 <button class="btn-item active" onclick="setN(this, '餅乾')">餅乾</button>
                 <button class="btn-item" onclick="setN(this, '飲料')">飲料</button>
                 <button class="btn-item" onclick="setN(this, '其他')">其他</button>
@@ -73,31 +74,45 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbybK8nRtGlEoJSmOd6_3ZNn84k_I0_puHjfNQRNj0VpsQ8GsVaykVsuiQKqM5u7eKA/exec";
+        const scriptURL = "您的部署網址";
         let scanner, globalId = "", isBusy = false;
 
+        // 🚀 核心邏輯：啟動掃描器 (不重整頁面)
         function startScan() {
             isBusy = false;
             document.getElementById('reader-container').style.display = 'block';
             document.getElementById('result-section').style.display = 'none';
-            if (!scanner) scanner = new Html5Qrcode("reader");
             
-            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
-                if (isBusy) return;
-                isBusy = true;
-                globalId = text.trim();
-                
-                // 進入時清空資料
-                document.getElementById('amount').value = "0";
-                const btns = document.querySelectorAll('.btn-item');
-                btns.forEach(b => b.classList.remove('active'));
-                btns[0].classList.add('active');
-                document.getElementById('note').value = "餅乾";
-                
-                document.getElementById('reader-container').style.display = 'none';
-                document.getElementById('result-section').style.display = 'block';
-                scanner.stop().then(() => fetchData());
-            }).catch(e => console.error(e));
+            if (!scanner) {
+                scanner = new Html5Qrcode("reader");
+            }
+            
+            scanner.start(
+                { facingMode: "environment" }, 
+                { fps: 15, qrbox: 250 }, 
+                onScanSuccess
+            ).catch(err => console.error("相機啟動失敗", err));
+        }
+
+        function onScanSuccess(text) {
+            if (isBusy) return;
+            isBusy = true;
+            globalId = text.trim();
+            
+            // 🚀 進入交易前徹底重置資料
+            document.getElementById('amount').value = "0";
+            const btns = document.querySelectorAll('.btn-item');
+            btns.forEach(b => b.classList.remove('active'));
+            btns[0].classList.add('active'); // 回到第一個「餅乾」
+            document.getElementById('note').value = btns[0].innerText;
+            document.getElementById('display-name').innerText = "讀取中...";
+            document.getElementById('display-balance').innerText = "---";
+
+            document.getElementById('reader-container').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+
+            // 停止相機 (不釋放權限)，然後抓資料
+            scanner.stop().then(() => fetchData());
         }
 
         async function fetchData() {
@@ -117,34 +132,47 @@
         async function doTrade() {
             const amt = document.getElementById('amount').value;
             if (amt == 0) return alert("請輸入金額");
+            
             const btn = document.getElementById('ok-btn');
             const note = document.getElementById('note').value;
-            btn.innerText = "寫入中..."; btn.disabled = true;
+            btn.innerText = "寫入中..."; 
+            btn.disabled = true;
 
             try {
                 const res = await fetch(`${scriptURL}?id=${encodeURIComponent(globalId)}&amount=${amt}&note=${encodeURIComponent(note)}&t=${Date.now()}`);
                 const data = await res.json();
                 if (data.status === "success") {
-                    alert(`✅ 成功！\n學員：${data.name}\n新餘額：${data.newBalance}`);
-                    resetUI();
-                } else { alert("錯誤：" + data.message); resetBtn(); }
+                    alert(`✅ 交易成功！\n學員：${data.name}\n新餘額：${data.newBalance}`);
+                    resetUI(); // 🚀 交易完後直接回掃描，不刷網頁
+                } else { 
+                    alert("錯誤：" + data.message); 
+                    resetBtn(); 
+                }
             } catch (e) {
-                alert("連線忙碌中，請查看試算表。");
+                alert("網路異常，請確認試算表紀錄。");
                 resetBtn();
             }
         }
 
-        function resetUI() { resetBtn(); startScan(); }
+        function resetUI() {
+            resetBtn();
+            startScan(); // 重新呼叫掃描函式
+        }
+
         function adj(v) { document.getElementById('amount').value = (parseInt(document.getElementById('amount').value) || 0) + v; }
+        
         function setN(btn, n) {
             document.querySelectorAll('.btn-item').forEach(e => e.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('note').value = n;
         }
+
         function resetBtn() {
             const btn = document.getElementById('ok-btn');
-            btn.innerText = "確認加值/扣款"; btn.disabled = false;
+            btn.innerText = "確認加值/扣款"; 
+            btn.disabled = false;
         }
+
         window.onload = startScan;
     </script>
 </body>
