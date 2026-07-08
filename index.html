@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>優兒行動銀行 v6.0 (五大區品項特製版)</title>
+    <title>優兒行動銀行 v6.5 (頂部凍結區塊導覽版)</title>
     
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
@@ -22,33 +22,60 @@
         }
         body { font-family: -apple-system, "Noto Sans TC", sans-serif; text-align: center; margin: 0;
         padding: 15px; background-color: var(--primary-pink); }
+        
         .main-card { background: var(--bg-pink); padding: 20px; border-radius: 30px;
         max-width: 400px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-height: 85vh;
+        display: flex; flex-direction: column;
         }
         
         #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 15px; min-height: 250px; }
         
-        .info-box { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        .info-box { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 20px; margin-bottom: 15px; }
         .user-id { font-size: 14px; color: #888; font-weight: bold; } 
         .user-name { font-size: 42px; font-weight: 900; color: var(--primary-pink); margin: 0; line-height: 1.1; }
         .user-balance { font-size: 36px; font-weight: bold; color: #333; margin: 5px 0; }
         
-        .input-group { margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
         .amount-input { 
             width: 80%; border: 3px solid var(--dark-gray); border-radius: 15px; 
             font-size: 42px; font-weight: bold; padding: 10px; text-align: center; outline: none; color: #000;
         }
         
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         .btn-quick { background: white; border: none; border-radius: 15px; padding: 15px 0; font-size: 18px; font-weight: bold; box-shadow: 0 4px 0 #ddd; }
         .btn-quick:active { transform: translateY(2px); box-shadow: none; }
         .q-plus { color: #4caf50; } .q-minus { color: #f44336; }
         
-        /* 5大分區與品項按鈕排版優化 */
-        .category-container { text-align: left; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 12px; border-radius: 18px; }
-        .category-title { font-size: 16px; font-weight: bold; color: #fff; background: var(--primary-pink); padding: 4px 12px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+        /* 🚀 凍結固定頂部導覽列樣式 */
+        .sticky-nav {
+            position: -webkit-sticky;
+            position: sticky;
+            top: -15px; /* 抵消外層卡片的內襯 */
+            background: var(--bg-pink);
+            z-index: 100;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(230, 0, 126, 0.2);
+        }
+        .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .btn-nav {
+            background: #fff; border: 2px solid var(--primary-pink); border-radius: 10px;
+            color: var(--primary-pink); font-size: 13px; font-weight: bold; padding: 8px 2px;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-nav:active { background: var(--primary-pink); color: white; }
+
+        /* 可滾動的下方品項清單區 */
+        .scrollable-items {
+            max-height: 320px; overflow-y: auto; margin-bottom: 15px; 
+            border-radius: 15px; padding-right: 3px; scroll-behavior: smooth;
+        }
+        
+        .category-container { text-align: left; margin-bottom: 15px; background: rgba(255,255,255,0.4); padding: 12px; border-radius: 18px; }
+        .category-title { font-size: 15px; font-weight: bold; color: #fff; background: var(--primary-pink); padding: 5px 12px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+        
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .btn-item { background: var(--btn-light); border: none; border-radius: 12px; padding: 10px 2px; font-size: 13px; font-weight: bold; color: #444; text-align: center; box-shadow: 0 2px 0 #ccc; }
+        .btn-item { background: var(--btn-light); border: none; border-radius: 12px; padding: 12px 2px; font-size: 14px; font-weight: bold; color: #444; text-align: center; box-shadow: 0 2px 0 #ccc; }
         .btn-item.active { background: var(--dark-gray); color: white; box-shadow: none; }
         
         .action-btn { display: block; width: 100%; padding: 18px 0; font-size: 20px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; margin-bottom: 10px; }
@@ -59,7 +86,7 @@
         #reset-btn { background: #666; color: white; }
 
         /* 🛒 購物車樣式 */
-        .cart-box { background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 20px; margin-bottom: 20px; text-align: left; border: 2px dashed var(--primary-pink); }
+        .cart-box { background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 20px; margin-bottom: 15px; text-align: left; border: 2px dashed var(--primary-pink); }
         .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e0e0e0; font-size: 15px; }
         .cart-row:last-child { border-bottom: none; }
         .btn-del-item { background: #f44336; color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
@@ -106,66 +133,77 @@
             <button class="btn-quick q-minus" onclick="modAmt(-50)">-50</button>
         </div>
 
-        <div style="max-height: 380px; overflow-y: auto; margin-bottom: 15px; border-radius: 15px; padding-right: 5px;">
+        <div class="sticky-nav">
+            <div style="font-size: 13px; text-align: left; font-weight: bold; color: var(--primary-pink); margin-bottom: 5px;">⚡ 分區快捷跳轉：</div>
+            <div class="nav-grid">
+                <button class="btn-nav" onclick="scrollToCategory('cat-rent')">⛺ 1.設備</button>
+                <button class="btn-nav" onclick="scrollToCategory('cat-survive')">🛡️ 2.生存</button>
+                <button class="btn-nav" onclick="scrollToCategory('cat-reward')">🏆 3.獎勵</button>
+                <button class="btn-nav" onclick="scrollToCategory('cat-snack')">🍪 4.點心</button>
+                <button class="btn-nav" onclick="scrollToCategory('cat-restaurant')">🍜 5.餐廳</button>
+            </div>
+        </div>
+
+        <div class="scrollable-items" id="items-scroll-box">
             
-            <div class="category-container">
+            <div class="category-container" id="cat-rent">
                 <div class="category-title">⛺ 1. 設備租借</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '桌子', -50)">桌子(-50)</button>
-                    <button class="btn-item" onclick="selectItem(this, '小椅子', -20)">小椅子(-20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '帳篷', -100)">帳篷(-100)</button>
-                    <button class="btn-item" onclick="selectItem(this, '大電風扇', -100)">大電風扇(-100)</button>
-                    <button class="btn-item" onclick="selectItem(this, '吊床', -100)">吊床(-100)</button>
-                    <button class="btn-item" onclick="selectItem(this, '睡袋', -150)">睡袋(-150)</button>
-                    <button class="btn-item" onclick="selectItem(this, '遺失工本費', -100)">遺失費(-100)</button>
+                    <button class="btn-item" onclick="selectItem(this, '桌子', -50)">桌子</button>
+                    <button class="btn-item" onclick="selectItem(this, '小椅子', -20)">小椅子</button>
+                    <button class="btn-item" onclick="selectItem(this, '帳篷', -100)">帳篷</button>
+                    <button class="btn-item" onclick="selectItem(this, '大電風扇', -100)">大電風扇</button>
+                    <button class="btn-item" onclick="selectItem(this, '吊床', -100)">吊床</button>
+                    <button class="btn-item" onclick="selectItem(this, '躺椅', -150)">躺椅</button>
+                    <button class="btn-item" onclick="selectItem(this, '遺失工本費', -100)">遺失工本費</button>
                 </div>
             </div>
 
-            <div class="category-container">
+            <div class="category-container" id="cat-survive">
                 <div class="category-title">🛡️ 2. 生存消費</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '水彈', -20)">水彈(-20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '長槍', -20)">長槍(-20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險(滑降)', -20)">滑降(-20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險(垂降)', -20)">垂降(-20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '打火石', 0)">打火石(0)</button>
-                    <button class="btn-item" onclick="selectItem(this, '打火機', -10)">打火機(-10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '教練生火', -150)">教練生火(-150)</button>
+                    <button class="btn-item" onclick="selectItem(this, '水彈', -20)">水彈</button>
+                    <button class="btn-item" onclick="selectItem(this, '長槍', -20)">長槍</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇氣險(滑降)', -20)">滑降</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇險(垂降)', -20)">垂降</button>
+                    <button class="btn-item" onclick="selectItem(this, '打火石', 0)">打火石</button>
+                    <button class="btn-item" onclick="selectItem(this, '打火機', -10)">打火機</button>
+                    <button class="btn-item" onclick="selectItem(this, '教練生火', -150)">教練生火</button>
                 </div>
             </div>
 
-            <div class="category-container">
+            <div class="category-container" id="cat-reward">
                 <div class="category-title">🏆 3. 獎勵金項目</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '全鑽獎金', 10)">全鑽(+10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '負責任金', 10)">負責任(+10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '任務獎金', 10)">任務(+10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險助金', 20)">冒險助(+20)</button>
-                    <button class="btn-item" onclick="selectItem(this, '點心販賣', 30)">點心販(+30)</button>
-                    <button class="btn-item" onclick="selectItem(this, '午餐販賣', 50)">午餐販(+50)</button>
-                    <button class="btn-item" onclick="selectItem(this, '設備二手拍賣', 0)">二手拍(0)</button>
+                    <button class="btn-item" onclick="selectItem(this, '全課獎金', 10)">全課獎金</button>
+                    <button class="btn-item" onclick="selectItem(this, '責任獎金', 10)">責任獎金</button>
+                    <button class="btn-item" onclick="selectItem(this, '任務獎金', 10)">任務獎金</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇氣險鼓勵金', 20)">勇氣險鼓勵金</button>
+                    <button class="btn-item" onclick="selectItem(this, '▲點心販賣', 30)">▲點心販賣</button>
+                    <button class="btn-item" onclick="selectItem(this, '▲午餐販賣', 50)">▲午餐販賣</button>
+                    <button class="btn-item" onclick="selectItem(this, '設備二手拍賣', 0)">設備二手拍賣</button>
                 </div>
             </div>
 
-            <div class="category-container">
+            <div class="category-container" id="cat-snack">
                 <div class="category-title">🍪 4. 點心部</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '蘋果汁', -10)">蘋果汁(-10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '可爾必思', -10)">可爾必必(-10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '舒跑', -10)">舒跑(-10)</button>
-                    <button class="btn-item" onclick="selectItem(this, '餅乾', -15)">餅乾(-15)</button>
-                    <button class="btn-item" onclick="selectItem(this, '布丁', -15)">布丁(-15)</button>
+                    <button class="btn-item" onclick="selectItem(this, '蘋果汁', -10)">蘋果汁</button>
+                    <button class="btn-item" onclick="selectItem(this, '可爾必思', -10)">可爾必思</button>
+                    <button class="btn-item" onclick="selectItem(this, '舒跑', -10)">舒跑</button>
+                    <button class="btn-item" onclick="selectItem(this, '餅乾', -15)">餅乾</button>
+                    <button class="btn-item" onclick="selectItem(this, '布丁', -15)">布丁</button>
                 </div>
             </div>
 
-            <div class="category-container">
+            <div class="category-container" id="cat-restaurant">
                 <div class="category-title">🍜 5. 餐廳部</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '營養什錦湯麵', -500)">湯麵(-500)</button>
-                    <button class="btn-item" onclick="selectItem(this, '猩美雞肉咖哩飯', -500)">咖哩飯(-500)</button>
-                    <button class="btn-item" onclick="selectItem(this, '香濃玉米濃湯', -250)">玉米湯(-250)</button>
-                    <button class="btn-item" onclick="selectItem(this, '珍珠冬瓜茶', -250)">冬瓜茶(-250)</button>
-                    <button class="btn-item" onclick="selectItem(this, '紅茶', -10)">紅茶(-10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '營養什錦湯麵', -500)">營養什錦湯麵</button>
+                    <button class="btn-item" onclick="selectItem(this, '甜美雞肉咖哩飯', -500)">甜美雞肉咖哩飯</button>
+                    <button class="btn-item" onclick="selectItem(this, '香濃玉米濃湯', -250)">香濃玉米濃湯</button>
+                    <button class="btn-item" onclick="selectItem(this, '珍珠冬瓜茶', -250)">珍珠冬瓜茶</button>
+                    <button class="btn-item" onclick="selectItem(this, '紅茶', -10)">紅茶</button>
                 </div>
             </div>
 
@@ -175,7 +213,7 @@
 
         <div id="cart-section" class="cart-box" style="display: none;">
             <div style="font-size: 15px; font-weight: bold; color: var(--primary-pink); margin-bottom: 8px; text-align: center;">🛒 目前待結帳明細</div>
-            <div id="cart-items-list" style="max-height: 160px; overflow-y: auto;"></div>
+            <div id="cart-items-list" style="max-height: 140px; overflow-y: auto;"></div>
             <div style="border-top: 1px dashed #bbb; margin-top: 8px; padding-top: 8px; font-weight: bold; text-align: right; font-size: 15px;">
                 合計變動：<span id="cart-total-val" style="color: red;">0</span> 元
             </div>
@@ -205,8 +243,7 @@ function playBeep(freq = 1200, duration = 0.1) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.type = "sine"; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
     gain.gain.setValueAtTime(0.8, audioCtx.currentTime); 
     osc.connect(gain); gain.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + duration);
@@ -257,7 +294,15 @@ function manualInput(val) {
     currentAmt = parseInt(val) || 0;
 }
 
-// 🚀 智慧點選品項：自動帶入名稱與預設負數/正數單價
+// 🚀 跳轉到特定大區塊的定位邏輯
+function scrollToCategory(id) {
+    const box = document.getElementById("items-scroll-box");
+    const target = document.getElementById(id);
+    if (box && target) {
+        box.scrollTop = target.offsetTop - box.offsetTop;
+    }
+}
+
 function selectItem(btn, note, defaultPrice) { 
     document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active')); 
     btn.classList.add('active'); 
@@ -270,9 +315,7 @@ function addItemToCart() {
     if (!currentNote) return alert("請先選取下方一個交易項目！");
     cart.push({ note: currentNote, amount: currentAmt });
     
-    // 清空選取狀態
-    currentAmt = 0;
-    currentNote = "";
+    currentAmt = 0; currentNote = "";
     document.getElementById("amount-input").value = "0";
     document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active'));
     renderCart();
@@ -321,8 +364,7 @@ function resetToScan() {
     const btnAddCart = document.getElementById("add-cart-btn");
     
     btnOk.disabled = false; btnOk.innerText = "確認交易送出";
-    btnReset.disabled = false;
-    if(btnAddCart) btnAddCart.disabled = false;
+    btnReset.disabled = false; if(btnAddCart) btnAddCart.disabled = false;
     
     document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active'));
     startScan();
