@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>優兒行動銀行 v5.5 (購物車升級版)</title>
+    <title>優兒行動銀行 v6.0 (五大區品項特製版)</title>
     
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
@@ -17,8 +17,8 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        :root 
-        { --primary-pink: #e6007e; --bg-pink: #fce4ec; --dark-gray: #333; --btn-light: #eee; --disabled-gray: #999;
+        :root { 
+            --primary-pink: #e6007e; --bg-pink: #fce4ec; --dark-gray: #333; --btn-light: #eee; --disabled-gray: #999;
         }
         body { font-family: -apple-system, "Noto Sans TC", sans-serif; text-align: center; margin: 0;
         padding: 15px; background-color: var(--primary-pink); }
@@ -26,110 +26,53 @@
         max-width: 400px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-height: 85vh;
         }
         
-        #reader { width: 100%;
-        border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 15px; min-height: 250px;
-        }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 15px; min-height: 250px; }
         
-        .info-box { background: rgba(255,255,255,0.5);
-        padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        .user-id { font-size: 14px; color: #888;
-        font-weight: bold; } 
-        .user-name { font-size: 42px; font-weight: 900; color: var(--primary-pink);
-        margin: 0; line-height: 1.1; }
-        .user-balance { font-size: 36px; font-weight: bold; color: #333;
-        margin: 5px 0; }
+        .info-box { background: rgba(255,255,255,0.5); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        .user-id { font-size: 14px; color: #888; font-weight: bold; } 
+        .user-name { font-size: 42px; font-weight: 900; color: var(--primary-pink); margin: 0; line-height: 1.1; }
+        .user-balance { font-size: 36px; font-weight: bold; color: #333; margin: 5px 0; }
         
-        /* 輸入框樣式優化 */
-        .input-group { margin-bottom: 20px;
-        }
+        .input-group { margin-bottom: 20px; }
         .amount-input { 
-            width: 80%;
-            border: 3px solid var(--dark-gray); border-radius: 15px; 
-            font-size: 42px; font-weight: bold; padding: 10px; text-align: center;
-            outline: none; color: #000;
+            width: 80%; border: 3px solid var(--dark-gray); border-radius: 15px; 
+            font-size: 42px; font-weight: bold; padding: 10px; text-align: center; outline: none; color: #000;
         }
         
-        .grid-4 { display: grid;
-        grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .btn-quick { background: white;
-        border: none; border-radius: 15px; padding: 15px 0; font-size: 18px; font-weight: bold; box-shadow: 0 4px 0 #ddd;
-        }
-        .btn-quick:active { transform: translateY(2px); box-shadow: none;
-        }
-        .q-plus { color: #4caf50; } .q-minus { color: #f44336;
-        }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .btn-quick { background: white; border: none; border-radius: 15px; padding: 15px 0; font-size: 18px; font-weight: bold; box-shadow: 0 4px 0 #ddd; }
+        .btn-quick:active { transform: translateY(2px); box-shadow: none; }
+        .q-plus { color: #4caf50; } .q-minus { color: #f44336; }
         
-        .grid-3 { display: grid;
-        grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: left; }
-        .item-label { grid-column: span 3;
-        font-size: 16px; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .btn-item { background: var(--btn-light);
-        border: none; border-radius: 12px; padding: 12px 2px; font-size: 14px; font-weight: bold; color: #444;
-        }
-        .btn-item.active { background: var(--dark-gray); color: white;
-        }
+        /* 5大分區與品項按鈕排版優化 */
+        .category-container { text-align: left; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 12px; border-radius: 18px; }
+        .category-title { font-size: 16px; font-weight: bold; color: #fff; background: var(--primary-pink); padding: 4px 12px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .btn-item { background: var(--btn-light); border: none; border-radius: 12px; padding: 10px 2px; font-size: 13px; font-weight: bold; color: #444; text-align: center; box-shadow: 0 2px 0 #ccc; }
+        .btn-item.active { background: var(--dark-gray); color: white; box-shadow: none; }
         
-        .action-btn { display: block;
-        width: 100%; padding: 18px 0; font-size: 20px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; margin-bottom: 10px;
-        }
-        .action-btn:disabled { background: var(--disabled-gray) !important; box-shadow: none !important; cursor: not-allowed;
-        color: #ddd !important; }
+        .action-btn { display: block; width: 100%; padding: 18px 0; font-size: 20px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; margin-bottom: 10px; }
+        .action-btn:disabled { background: var(--disabled-gray) !important; box-shadow: none !important; cursor: not-allowed; color: #ddd !important; }
         
-        #start-btn { background: #4CAF50;
-        color: white; }
-        #ok-btn { background: var(--primary-pink); color: white;
-        box-shadow: 0 5px 0 #ad005f; }
-        #reset-btn { background: #666; color: white;
-        }
+        #start-btn { background: #4CAF50; color: white; }
+        #ok-btn { background: var(--primary-pink); color: white; box-shadow: 0 5px 0 #ad005f; }
+        #reset-btn { background: #666; color: white; }
 
-        /* 🛒 購物車專用追加精緻樣式 */
-        .cart-box {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 15px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            text-align: left;
-            border: 2px dashed var(--primary-pink);
-        }
-        .cart-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px dashed #e0e0e0;
-            font-size: 15px;
-        }
+        /* 🛒 購物車樣式 */
+        .cart-box { background: rgba(255, 255, 255, 0.85); padding: 15px; border-radius: 20px; margin-bottom: 20px; text-align: left; border: 2px dashed var(--primary-pink); }
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e0e0e0; font-size: 15px; }
         .cart-row:last-child { border-bottom: none; }
-        .btn-del-item {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .btn-del-item { background: #f44336; color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
 
         /* 彈窗樣式 */
-        #custom-modal { display: none;
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;
-        }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 92%; max-width: 400px;
-        font-size: 20px; color: #333; box-sizing: border-box; }
-        .modal-header { text-align: center; font-weight: bold;
-        color: #28a745; margin-bottom: 15px; font-size: 26px; }
-        .modal-body { text-align: left;
-        border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 20px 0; margin-bottom: 20px;
-        }
-        .modal-line { margin-bottom: 12px; display: flex; align-items: center;
-        }
-        .modal-label { display: inline-block; width: 140px; flex-shrink: 0; font-weight: bold; white-space: nowrap;
-        text-align-last: justify; }
-        .modal-value { flex-grow: 1; padding-left: 5px;
-        }
-        .modal-btn { width: 100%; padding: 18px; background: var(--primary-pink); color: white; border: none;
-        border-radius: 12px; font-size: 22px; font-weight: bold; }
+        #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 92%; max-width: 400px; font-size: 20px; color: #333; box-sizing: border-box; }
+        .modal-header { text-align: center; font-weight: bold; color: #28a745; margin-bottom: 15px; font-size: 26px; }
+        .modal-body { text-align: left; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 20px 0; margin-bottom: 20px; }
+        .modal-line { margin-bottom: 12px; display: flex; align-items: center; }
+        .modal-label { display: inline-block; width: 140px; flex-shrink: 0; font-weight: bold; white-space: nowrap; text-align-last: justify; }
+        .modal-value { flex-grow: 1; padding-left: 5px; }
+        .modal-btn { width: 100%; padding: 18px; background: var(--primary-pink); color: white; border: none; border-radius: 12px; font-size: 22px; font-weight: bold; }
     </style>
 </head>
 
@@ -163,20 +106,69 @@
             <button class="btn-quick q-minus" onclick="modAmt(-50)">-50</button>
         </div>
 
-        <div class="grid-3">
-            <div class="item-label">選擇交易項目：</div>
-            <button class="btn-item active" onclick="setNote(this, '餅乾')">餅乾</button>
-            <button class="btn-item" onclick="setNote(this, '飲料')">飲料</button>
-            <button class="btn-item" onclick="setNote(this, '預留1')">預留1</button>
-            <button class="btn-item" onclick="setNote(this, '預留2')">預留2</button>
-            <button class="btn-item" onclick="setNote(this, '預留3')">預留3</button>
-            <button class="btn-item" onclick="setNote(this, '預留4')">預留4</button>
-            <button class="btn-item" onclick="setNote(this, '預留5')">預留5</button>
-            <button class="btn-item" onclick="setNote(this, '預留6')">預留6</button>
-            <button class="btn-item" onclick="setNote(this, '預留7')">預留7</button>
-            <button class="btn-item" onclick="setNote(this, '預留8')">預留8</button>
-            <button class="btn-item" onclick="setNote(this, '預留9')">預留9</button>
-            <button class="btn-item" onclick="setNote(this, '預留10')">預留10</button>
+        <div style="max-height: 380px; overflow-y: auto; margin-bottom: 15px; border-radius: 15px; padding-right: 5px;">
+            
+            <div class="category-container">
+                <div class="category-title">⛺ 1. 設備租借</div>
+                <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '桌子', -50)">桌子(-50)</button>
+                    <button class="btn-item" onclick="selectItem(this, '小椅子', -20)">小椅子(-20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '帳篷', -100)">帳篷(-100)</button>
+                    <button class="btn-item" onclick="selectItem(this, '大電風扇', -100)">大電風扇(-100)</button>
+                    <button class="btn-item" onclick="selectItem(this, '吊床', -100)">吊床(-100)</button>
+                    <button class="btn-item" onclick="selectItem(this, '睡袋', -150)">睡袋(-150)</button>
+                    <button class="btn-item" onclick="selectItem(this, '遺失工本費', -100)">遺失費(-100)</button>
+                </div>
+            </div>
+
+            <div class="category-container">
+                <div class="category-title">🛡️ 2. 生存消費</div>
+                <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '水彈', -20)">水彈(-20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '長槍', -20)">長槍(-20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險(滑降)', -20)">滑降(-20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險(垂降)', -20)">垂降(-20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '打火石', 0)">打火石(0)</button>
+                    <button class="btn-item" onclick="selectItem(this, '打火機', -10)">打火機(-10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '教練生火', -150)">教練生火(-150)</button>
+                </div>
+            </div>
+
+            <div class="category-container">
+                <div class="category-title">🏆 3. 獎勵金項目</div>
+                <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '全鑽獎金', 10)">全鑽(+10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '負責任金', 10)">負責任(+10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '任務獎金', 10)">任務(+10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '勇敢冒險助金', 20)">冒險助(+20)</button>
+                    <button class="btn-item" onclick="selectItem(this, '點心販賣', 30)">點心販(+30)</button>
+                    <button class="btn-item" onclick="selectItem(this, '午餐販賣', 50)">午餐販(+50)</button>
+                    <button class="btn-item" onclick="selectItem(this, '設備二手拍賣', 0)">二手拍(0)</button>
+                </div>
+            </div>
+
+            <div class="category-container">
+                <div class="category-title">🍪 4. 點心部</div>
+                <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '蘋果汁', -10)">蘋果汁(-10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '可爾必思', -10)">可爾必必(-10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '舒跑', -10)">舒跑(-10)</button>
+                    <button class="btn-item" onclick="selectItem(this, '餅乾', -15)">餅乾(-15)</button>
+                    <button class="btn-item" onclick="selectItem(this, '布丁', -15)">布丁(-15)</button>
+                </div>
+            </div>
+
+            <div class="category-container">
+                <div class="category-title">🍜 5. 餐廳部</div>
+                <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '營養什錦湯麵', -500)">湯麵(-500)</button>
+                    <button class="btn-item" onclick="selectItem(this, '猩美雞肉咖哩飯', -500)">咖哩飯(-500)</button>
+                    <button class="btn-item" onclick="selectItem(this, '香濃玉米濃湯', -250)">玉米湯(-250)</button>
+                    <button class="btn-item" onclick="selectItem(this, '珍珠冬瓜茶', -250)">冬瓜茶(-250)</button>
+                    <button class="btn-item" onclick="selectItem(this, '紅茶', -10)">紅茶(-10)</button>
+                </div>
+            </div>
+
         </div>
 
         <button id="add-cart-btn" class="action-btn" style="background: #ff9800; color: white; box-shadow: 0 5px 0 #e65100; margin-bottom: 15px;" onclick="addItemToCart()">🛒 加入購物車</button>
@@ -205,8 +197,8 @@
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
 const TOKEN = "abc123";
-let scanner = null, globalId = "", currentAmt = 0, currentNote = "餅乾", oldBalance = 0;
-let cart = []; // 🚀 存放購物車項目的陣列
+let scanner = null, globalId = "", currentAmt = 0, currentNote = "", oldBalance = 0;
+let cart = [];
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBeep(freq = 1200, duration = 0.1) {
@@ -217,13 +209,11 @@ function playBeep(freq = 1200, duration = 0.1) {
     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
     gain.gain.setValueAtTime(0.8, audioCtx.currentTime); 
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
 }
 
 const successSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-successSound.crossOrigin = "anonymous";
-successSound.volume = 0.3;
+successSound.crossOrigin = "anonymous"; successSound.volume = 0.3;
 
 function initAndStart() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -254,8 +244,7 @@ async function fetchData() {
             document.getElementById("display-id").innerText = "ID: " + globalId;
             document.getElementById("display-name").innerText = data.name;
             document.getElementById("display-balance").innerText = data.balance;
-        } else { alert("查無資料"); resetToScan();
-        }
+        } else { alert("查無資料"); resetToScan(); }
     } catch (e) { alert("連線失敗"); resetToScan(); }
 }
 
@@ -268,32 +257,32 @@ function manualInput(val) {
     currentAmt = parseInt(val) || 0;
 }
 
-function setNote(btn, note) { 
+// 🚀 智慧點選品項：自動帶入名稱與預設負數/正數單價
+function selectItem(btn, note, defaultPrice) { 
     document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active')); 
     btn.classList.add('active'); 
     currentNote = note;
+    currentAmt = defaultPrice;
+    document.getElementById("amount-input").value = currentAmt;
 }
 
-// 🚀 【新增】將當前設定加入購物車
 function addItemToCart() {
-    if (currentAmt === 0) return alert("請輸入有效金額再加入購物車");
-    cart.push({
-        note: currentNote,
-        amount: currentAmt
-    });
-    // 加入後自動將輸入金額歸零，方便點選下一件商品
+    if (!currentNote) return alert("請先選取下方一個交易項目！");
+    cart.push({ note: currentNote, amount: currentAmt });
+    
+    // 清空選取狀態
     currentAmt = 0;
+    currentNote = "";
     document.getElementById("amount-input").value = "0";
+    document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active'));
     renderCart();
 }
 
-// 🚀 【新增】單筆刪除購物車項目
 function delCartItem(index) {
     cart.splice(index, 1);
     renderCart();
 }
 
-// 🚀 【新增】動態渲染購物車介面與按鈕文字
 function renderCart() {
     const sect = document.getElementById("cart-section");
     const list = document.getElementById("cart-items-list");
@@ -307,8 +296,7 @@ function renderCart() {
     }
     
     sect.style.display = "block";
-    let html = "";
-    let total = 0;
+    let html = ""; let total = 0;
     cart.forEach((item, idx) => {
         total += item.amount;
         html += `<div class="cart-row">
@@ -322,37 +310,33 @@ function renderCart() {
 }
 
 function resetToScan() {
-    globalId = ""; currentAmt = 0; currentNote = "餅乾";
-    cart = []; // 🚀 重置購物車
+    globalId = ""; currentAmt = 0; currentNote = ""; cart = [];
     renderCart();
-    
     document.getElementById("amount-input").value = "0";
     document.getElementById("trade-ui").style.display = "none";
     document.getElementById("reader").style.display = "block";
     
     const btnOk = document.getElementById("ok-btn");
     const btnReset = document.getElementById("reset-btn");
+    const btnAddCart = document.getElementById("add-cart-btn");
+    
     btnOk.disabled = false; btnOk.innerText = "確認交易送出";
     btnReset.disabled = false;
+    if(btnAddCart) btnAddCart.disabled = false;
     
-    document.querySelectorAll('.btn-item').forEach((b, i) => b.classList.toggle('active', i === 0));
+    document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active'));
     startScan();
 }
 
-function closeModal() { document.getElementById("custom-modal").style.display = "none"; resetToScan();
-}
-function createModalLine(label, value) { return `<div class="modal-line"><span class="modal-label">${label}</span><span class="modal-value">： ${value}</span></div>`;
-}
+function closeModal() { document.getElementById("custom-modal").style.display = "none"; resetToScan(); }
+function createModalLine(label, value) { return `<div class="modal-line"><span class="modal-label">${label}</span><span class="modal-value">： ${value}</span></div>`; }
 
-// 🚀 【智慧升級】批次/單筆 交易送出邏輯
 async function doTrade() {
     let tradesToSend = [];
-    
-    // 如果購物車有東西，就用購物車的清單；沒有的話就抓現在畫面上填的單筆
     if (cart.length > 0) {
         tradesToSend = [...cart];
     } else {
-        if (currentAmt === 0) return alert("請輸入金額或加入購物車");
+        if (!currentNote) return alert("請選取交易項目或加入購物車");
         tradesToSend.push({ note: currentNote, amount: currentAmt });
     }
     
@@ -360,23 +344,18 @@ async function doTrade() {
     const btnReset = document.getElementById("reset-btn");
     const btnAddCart = document.getElementById("add-cart-btn");
     
-    btnOk.disabled = true; 
-    btnOk.innerText = "⏳ 交易進行中...";
-    btnReset.disabled = true;
-    if(btnAddCart) btnAddCart.disabled = true;
+    btnOk.disabled = true; btnOk.innerText = "⏳ 交易進行中...";
+    btnReset.disabled = true; if(btnAddCart) btnAddCart.disabled = true;
     
     try {
         let finalNewBalance = oldBalance;
-        let finalName = "";
-        let detailsHtml = "";
+        let finalName = ""; let detailsHtml = "";
         
-        // 🚀 核心排隊機制：依序幫同一位學員發送多筆交易明細
         for (let i = 0; i < tradesToSend.length; i++) {
             const t = tradesToSend[i];
             if (tradesToSend.length > 1) {
                 btnOk.innerText = `⏳ 進行中 (${i+1}/${tradesToSend.length})`;
             }
-            // 利用時間戳附加索引確保 tid 唯一
             const res = await fetch(`${scriptURL}?id=${globalId}&amount=${t.amount}&token=${TOKEN}&note=${encodeURIComponent(t.note)}&tid=T${Date.now()}_${i}`);
             const data = await res.json();
             
@@ -386,15 +365,12 @@ async function doTrade() {
                 detailsHtml += `<div style="font-size:15px; margin-bottom:4px; padding-left:10px;">• ${t.note}：<b>${t.amount > 0 ? '+' : ''}${t.amount}元</b></div>`;
             } else { 
                 alert(`❌ 第 ${i+1} 筆失敗：` + data.message);
-                btnOk.disabled = false;
-                btnReset.disabled = false;
+                btnOk.disabled = false; btnReset.disabled = false;
                 if(btnAddCart) btnAddCart.disabled = false;
-                renderCart();
-                return;
+                renderCart(); return;
             }
         }
         
-        // 全部成功後播放音效與彈出整合視窗
         successSound.play().catch(()=>{});
         let infoHTML = createModalLine("【學員 ID】", globalId) + 
                        createModalLine("【學員姓名】", finalName) + 
@@ -405,12 +381,10 @@ async function doTrade() {
                        
         document.getElementById("modal-body-content").innerHTML = infoHTML;
         document.getElementById("custom-modal").style.display = "flex";
-        
-        cart = []; // 交易成功清空購物車
+        cart = [];
     } catch (e) { 
-        alert("網路錯誤或連線逾時，請檢查 Google 試算表後台！");
-        btnOk.disabled = false; 
-        btnReset.disabled = false;
+        alert("網路錯誤或連線逾時，請檢查後台試算表！");
+        btnOk.disabled = false; btnReset.disabled = false;
         if(btnAddCart) btnAddCart.disabled = false;
         renderCart();
     }
