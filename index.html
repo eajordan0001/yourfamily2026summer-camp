@@ -1,473 +1,420 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>優兒夏令營行動銀行 - 智慧購物車收銀台</title>
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    :root {
-      --primary-color: #e6007e; /* 優兒標準桃紅色 */
-      --secondary-color: #333;
-      --light-bg: #f8f9fa;
-      --danger-color: #dc3545;
-      --success-color: #28a745;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>優兒行動銀行 v5.5 (購物車升級版)</title>
     
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: var(--light-bg);
-      color: #333;
-    }
-
-    header {
-      background-color: var(--primary-color);
-      color: white;
-      text-align: center;
-      padding: 15px 10px;
-      font-size: 20px;
-      font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 15px auto;
-      padding: 0 15px;
-      box-sizing: border-box;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      color: var(--secondary-color);
-      border-left: 4px solid var(--primary-color);
-      padding-left: 8px;
-    }
-
-    /* 快捷商品按鈕區 */
-    .quick-goods {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .good-btn {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 10px 5px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .good-btn:active {
-      transform: scale(0.95);
-      background-color: #fff0f6;
-      border-color: var(--primary-color);
-    }
-
-    .good-name {
-      font-size: 14px;
-      font-weight: bold;
-      display: block;
-    }
-
-    .good-price {
-      font-size: 12px;
-      color: var(--primary-color);
-      margin-top: 4px;
-      display: block;
-    }
-
-    /* 手動輸入表單 */
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 15px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      box-sizing: border-box;
-    }
-
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .btn-success {
-      background-color: var(--success-color);
-      color: white;
-      margin-top: 10px;
-    }
-
-    /* 購物車樣式 */
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .cart-item:last-child {
-      border-bottom: none;
-    }
-
-    .cart-item-info {
-      flex: 1;
-    }
-
-    .cart-item-title {
-      font-weight: bold;
-      font-size: 15px;
-    }
-
-    .cart-item-meta {
-      font-size: 13px;
-      color: #777;
-      margin-top: 2px;
-    }
-
-    .cart-item-price {
-      font-weight: bold;
-      color: var(--danger-color);
-      margin-right: 15px;
-    }
-
-    .btn-delete {
-      background: none;
-      border: 1px solid var(--danger-color);
-      color: var(--danger-color);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .btn-delete:hover {
-      background-color: #fff5f5;
-    }
-
-    .cart-summary {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      padding-top: 12px;
-      border-top: 2px dashed #ddd;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .total-amount {
-      color: var(--danger-color);
-      font-size: 20px;
-    }
-
-    .empty-cart {
-      text-align: center;
-      color: #999;
-      padding: 20px 0;
-      font-style: italic;
-    }
-
-    /* 掃描相機區塊 */
-    #reader {
-      width: 100%;
-      background: #000;
-      border-radius: 8px;
-      overflow: hidden;
-      display: none;
-      margin-bottom: 15px;
-    }
-
-    /* 讀取中遮罩 */
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 9999;
-      color: white;
-      text-align: center;
-      padding-top: 40vh;
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-  <header>🛒 優兒虛擬銀行 - 購物車收收銀台</header>
-
-  <div class="container">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+    <link rel="apple-touch-icon" href="./icon-512.png">
     
-    <div class="card">
-      <div class="card-title">💡 快捷商品點選（點擊直接加入購物車）</div>
-      <div class="quick-goods">
-        <div class="good-btn" onclick="addToCart('飲料🥤', -20)">
-          <span class="good-name">飲料🥤</span>
-          <span class="good-price">-20 元</span>
-        </div>
-        <div class="good-btn" onclick="addToCart('餅乾🍪', -15)">
-          <span class="good-name">餅乾🍪</span>
-          <span class="good-price">-15 元</span>
-        </div>
-        <div class="good-btn" onclick="addToCart('冰棒🍦', -25)">
-          <span class="good-name">冰棒🍦</span>
-          <span class="good-price">-25 元</span>
-        </div>
-        <div class="good-btn" onclick="addToCart('手作材料🎨', -50)">
-          <span class="good-name">材料🎨</span>
-          <span class="good-price">-50 元</span>
-        </div>
-        <div class="good-btn" onclick="addToCart('存入營隊金🪙', 100)">
-          <span class="good-name">存錢🪙</span>
-          <span class="good-price">+100 元</span>
-        </div>
-      </div>
-      
-      <div style="border-top: 1px solid #eee; padding-top: 12px;">
-        <div class="form-group">
-          <label>手動輸入金額（扣款請輸入負數，如 -30）</label>
-          <input type="number" id="customAmount" class="form-control" placeholder="例如：-30">
-        </div>
-        <div class="form-group">
-          <label>交易項目備註</label>
-          <input type="text" id="customNote" class="form-control" placeholder="例如：購買茶葉蛋">
-        </div>
-        <button class="btn btn-primary" onclick="addCustomToCart()">➕ 加入購物車</button>
-      </div>
-    </div>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="優兒行動銀行">
 
-    <div class="card">
-      <div class="card-title">🛒 目前購物車待結帳清單</div>
-      <div id="cartList">
-        <div class="empty-cart">購物車還是空的，請點選上方商品</div>
-      </div>
-      
-      <div class="cart-summary">
-        <span>待處理筆數: <span id="cartCount">0</span> 筆</span>
-        <span>合計變動金額: <span id="cartTotal" class="total-amount">0</span> 元</span>
-      </div>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
-      <button class="btn btn-success" id="btnPay" onclick="startScan()" style="display: none;">
-        📷 開啟相機．掃描學員 QR 碼結帳
-      </button>
-    </div>
-
-    <div id="reader"></div>
-
-  </div>
-
-  <div class="loading-overlay" id="loadingOverlay">
-    🔄 正在批次處裡交易中，請稍後...<br>
-    <span id="progressText" style="font-size: 14px; color: #ffeb3b;"></span>
-  </div>
-
-  <script>
-    // 🚀 請在此處填入您的 Google Apps Script 部署後的網頁應用程式 URL
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec"; 
-
-    let shoppingCart = [];
-    let html5QrcodeScanner = null;
-
-    // 1. 將商品加入購物車
-    function addToCart(note, amount) {
-      shoppingCart.push({
-        id: Date.now() + Math.random().toString(36).substr(2, 5), // 唯一代碼供刪除使用
-        note: note,
-        amount: parseFloat(amount)
-      });
-      renderCart();
-    }
-
-    // 2. 手動輸入加入購物車
-    function addCustomToCart() {
-      const amountInput = document.getElementById("customAmount");
-      const noteInput = document.getElementById("customNote");
-      
-      const amount = parseFloat(amountInput.value);
-      const note = noteInput.value.trim() || "一般交易";
-
-      if (isNaN(amount) || amount === 0) {
-        alert("請輸入有效的交易金額！");
-        return;
-      }
-
-      addToCart(note, amount);
-      
-      // 清空輸入框
-      amountInput.value = "";
-      noteInput.value = "";
-    }
-
-    // 3. 單筆刪除功能
-    function deleteItem(itemId) {
-      shoppingCart = shoppingCart.filter(item => item.id !== itemId);
-      renderCart();
-    }
-
-    // 4. 渲染購物車畫面
-    function renderCart() {
-      const cartList = document.getElementById("cartList");
-      const cartCount = document.getElementById("cartCount");
-      const cartTotal = document.getElementById("cartTotal");
-      const btnPay = document.getElementById("btnPay");
-
-      if (shoppingCart.length === 0) {
-        cartList.innerHTML = `<div class="empty-cart">購物車還是空的，請點選上方商品</div>`;
-        cartCount.innerText = "0";
-        cartTotal.innerText = "0";
-        btnPay.style.display = "none";
-        stopScan(); // 購物車空了就關閉相機
-        return;
-      }
-
-      let html = "";
-      let total = 0;
-      shoppingCart.forEach((item, index) => {
-        total += item.amount;
-        const priceStyle = item.amount < 0 ? "color: var(--danger-color)" : "color: var(--success-color)";
-        const prefix = item.amount > 0 ? "+" : "";
-        
-        html += `
-          <div class="cart-item">
-            <div class="cart-item-info">
-              <div class="cart-item-title">${index + 1}. ${item.note}</div>
-              <div class="cart-item-meta">型態: ${item.amount < 0 ? '扣款 📉' : '存錢 📈'}</div>
-            </div>
-            <div class="cart-item-price" style="${priceStyle}">${prefix}${item.amount}元</div>
-            <button class="btn-delete" onclick="deleteItem('${item.id}')">❌ 刪除</button>
-          </div>
-        `;
-      });
-
-      cartList.innerHTML = html;
-      cartCount.innerText = shoppingCart.length;
-      cartTotal.innerText = (total > 0 ? "+" : "") + total;
-      btnPay.style.display = "block"; // 顯示結帳按鈕
-    }
-
-    // 5. 開啟相機功能
-    function startScan() {
-      const readerDiv = document.getElementById("reader");
-      readerDiv.style.display = "block";
-      
-      if (!html5QrcodeScanner) {
-        html5QrcodeScanner = new Html5Qrcode("reader");
-      }
-
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-      
-      html5QrcodeScanner.start(
-        { facingMode: "environment" }, 
-        config,
-        onScanSuccess
-      ).catch(err => {
-        alert("無法開啟相機，請檢查權限：" + err);
-      });
-    }
-
-    // 6. 關閉相機
-    function stopScan() {
-      if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
-        html5QrcodeScanner.stop().then(() => {
-          document.getElementById("reader").style.display = "none";
-        });
-      }
-    }
-
-    // 7. 掃描成功：開始執行批次發送後端扣款邏輯
-    async function onScanSuccess(decodedText) {
-      // 停止掃描，避免重複觸發
-      stopScan();
-      
-      const studentId = decodedText.trim().toUpperCase();
-      const overlay = document.getElementById("loadingOverlay");
-      const progressText = document.getElementById("progressText");
-      
-      overlay.style.display = "block";
-      
-      let successCount = 0;
-      let lastUserName = "學員";
-      let finalBalance = 0;
-
-      // 🚀 動態核心：利用迴圈依序把購物車內的每一筆品項丟給後端 GAS 處理
-      for (let i = 0; i < shoppingCart.length; i++) {
-        const item = shoppingCart[i];
-        progressText.innerText = `正在處理第 (${i + 1}/${shoppingCart.length}) 筆: ${item.note}...`;
-        
-        try {
-          const targetUrl = `${GAS_WEB_APP_URL}?id=${encodeURIComponent(studentId)}&amount=${item.amount}&note=${encodeURIComponent(item.note)}`;
-          
-          const response = await fetch(targetUrl);
-          const result = await response.json();
-          
-          if (result.status === "success") {
-            successCount++;
-            lastUserName = result.name;
-            finalBalance = result.newBalance;
-          } else {
-            console.error(`第 ${i+1} 筆失敗原因: ${result.message}`);
-          }
-        } catch (error) {
-          console.error(`第 ${i+1} 筆連線失敗`, error);
+    <style>
+        :root 
+        { --primary-pink: #e6007e; --bg-pink: #fce4ec; --dark-gray: #333; --btn-light: #eee; --disabled-gray: #999;
         }
-      }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; text-align: center; margin: 0;
+        padding: 15px; background-color: var(--primary-pink); }
+        .main-card { background: var(--bg-pink); padding: 20px; border-radius: 30px;
+        max-width: 400px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-height: 85vh;
+        }
+        
+        #reader { width: 100%;
+        border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 15px; min-height: 250px;
+        }
+        
+        .info-box { background: rgba(255,255,255,0.5);
+        padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        .user-id { font-size: 14px; color: #888;
+        font-weight: bold; } 
+        .user-name { font-size: 42px; font-weight: 900; color: var(--primary-pink);
+        margin: 0; line-height: 1.1; }
+        .user-balance { font-size: 36px; font-weight: bold; color: #333;
+        margin: 5px 0; }
+        
+        /* 輸入框樣式優化 */
+        .input-group { margin-bottom: 20px;
+        }
+        .amount-input { 
+            width: 80%;
+            border: 3px solid var(--dark-gray); border-radius: 15px; 
+            font-size: 42px; font-weight: bold; padding: 10px; text-align: center;
+            outline: none; color: #000;
+        }
+        
+        .grid-4 { display: grid;
+        grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .btn-quick { background: white;
+        border: none; border-radius: 15px; padding: 15px 0; font-size: 18px; font-weight: bold; box-shadow: 0 4px 0 #ddd;
+        }
+        .btn-quick:active { transform: translateY(2px); box-shadow: none;
+        }
+        .q-plus { color: #4caf50; } .q-minus { color: #f44336;
+        }
+        
+        .grid-3 { display: grid;
+        grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: left; }
+        .item-label { grid-column: span 3;
+        font-size: 16px; font-weight: bold; color: #555; margin-bottom: 5px; }
+        .btn-item { background: var(--btn-light);
+        border: none; border-radius: 12px; padding: 12px 2px; font-size: 14px; font-weight: bold; color: #444;
+        }
+        .btn-item.active { background: var(--dark-gray); color: white;
+        }
+        
+        .action-btn { display: block;
+        width: 100%; padding: 18px 0; font-size: 20px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; margin-bottom: 10px;
+        }
+        .action-btn:disabled { background: var(--disabled-gray) !important; box-shadow: none !important; cursor: not-allowed;
+        color: #ddd !important; }
+        
+        #start-btn { background: #4CAF50;
+        color: white; }
+        #ok-btn { background: var(--primary-pink); color: white;
+        box-shadow: 0 5px 0 #ad005f; }
+        #reset-btn { background: #666; color: white;
+        }
 
-      overlay.style.display = "none";
+        /* 🛒 購物車專用追加精緻樣式 */
+        .cart-box {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            border: 2px dashed var(--primary-pink);
+        }
+        .cart-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 15px;
+        }
+        .cart-row:last-child { border-bottom: none; }
+        .btn-del-item {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-      // 8. 顯示最終整合報告
-      if (successCount === shoppingCart.length) {
-        alert(`✅ 結帳成功！\n戶名：${lastUserName}\n成功處理：${successCount} 筆交易\n最新餘額：${finalBalance} 元`);
-        shoppingCart = []; // 成功後清空購物車
-        renderCart();
-      } else if (successCount > 0) {
-        alert(`⚠ 部分交易成功\n成功：${successCount} 筆，失敗：${shoppingCart.length - successCount} 筆\n請手動檢查試算表紀錄！`);
-        shoppingCart = shoppingCart.slice(successCount); // 留存失敗的項目在購物車
-        renderCart();
-      } else {
-        alert(`❌ 交易全數失敗，請確認該學員 ID (${studentId}) 是否存在於名單中。`);
-      }
+        /* 彈窗樣式 */
+        #custom-modal { display: none;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 92%; max-width: 400px;
+        font-size: 20px; color: #333; box-sizing: border-box; }
+        .modal-header { text-align: center; font-weight: bold;
+        color: #28a745; margin-bottom: 15px; font-size: 26px; }
+        .modal-body { text-align: left;
+        border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 20px 0; margin-bottom: 20px;
+        }
+        .modal-line { margin-bottom: 12px; display: flex; align-items: center;
+        }
+        .modal-label { display: inline-block; width: 140px; flex-shrink: 0; font-weight: bold; white-space: nowrap;
+        text-align-last: justify; }
+        .modal-value { flex-grow: 1; padding-left: 5px;
+        }
+        .modal-btn { width: 100%; padding: 18px; background: var(--primary-pink); color: white; border: none;
+        border-radius: 12px; font-size: 22px; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+<div class="main-card">
+    <h2>💰 優兒夏令營行動銀行 💰</h2>
+    <button id="start-btn" class="action-btn" onclick="initAndStart()">📢 點擊啟動相機</button>
+    <div id="reader" style="display:none;"></div>
+
+    <div id="trade-ui" style="display:none;">
+        <div class="info-box">
+            <div id="display-id" class="user-id">ID: ----</div>
+            <div id="display-name" class="user-name">---</div>
+            <div style="font-size:14px; color:#666; margin-top:5px;">目前餘額</div>
+            <div id="display-balance" class="user-balance">---</div>
+        </div>
+        
+        <div class="input-group">
+            <div style="font-size:14px; color:#555; margin-bottom:5px; font-weight:bold;">異動金額 (可手動修改)</div>
+            <input type="number" id="amount-input" class="amount-input" value="0" oninput="manualInput(this.value)">
+        </div>
+        
+        <div class="grid-4">
+            <button class="btn-quick q-plus" onclick="modAmt(1)">+1</button>
+            <button class="btn-quick q-plus" onclick="modAmt(5)">+5</button>
+            <button class="btn-quick q-plus" onclick="modAmt(10)">+10</button>
+            <button class="btn-quick q-plus" onclick="modAmt(50)">+50</button>
+            <button class="btn-quick q-minus" onclick="modAmt(-1)">-1</button>
+            <button class="btn-quick q-minus" onclick="modAmt(-5)">-5</button>
+            <button class="btn-quick q-minus" onclick="modAmt(-10)">-10</button>
+            <button class="btn-quick q-minus" onclick="modAmt(-50)">-50</button>
+        </div>
+
+        <div class="grid-3">
+            <div class="item-label">選擇交易項目：</div>
+            <button class="btn-item active" onclick="setNote(this, '餅乾')">餅乾</button>
+            <button class="btn-item" onclick="setNote(this, '飲料')">飲料</button>
+            <button class="btn-item" onclick="setNote(this, '預留1')">預留1</button>
+            <button class="btn-item" onclick="setNote(this, '預留2')">預留2</button>
+            <button class="btn-item" onclick="setNote(this, '預留3')">預留3</button>
+            <button class="btn-item" onclick="setNote(this, '預留4')">預留4</button>
+            <button class="btn-item" onclick="setNote(this, '預留5')">預留5</button>
+            <button class="btn-item" onclick="setNote(this, '預留6')">預留6</button>
+            <button class="btn-item" onclick="setNote(this, '預留7')">預留7</button>
+            <button class="btn-item" onclick="setNote(this, '預留8')">預留8</button>
+            <button class="btn-item" onclick="setNote(this, '預留9')">預留9</button>
+            <button class="btn-item" onclick="setNote(this, '預留10')">預留10</button>
+        </div>
+
+        <button id="add-cart-btn" class="action-btn" style="background: #ff9800; color: white; box-shadow: 0 5px 0 #e65100; margin-bottom: 15px;" onclick="addItemToCart()">🛒 加入購物車</button>
+
+        <div id="cart-section" class="cart-box" style="display: none;">
+            <div style="font-size: 15px; font-weight: bold; color: var(--primary-pink); margin-bottom: 8px; text-align: center;">🛒 目前待結帳明細</div>
+            <div id="cart-items-list" style="max-height: 160px; overflow-y: auto;"></div>
+            <div style="border-top: 1px dashed #bbb; margin-top: 8px; padding-top: 8px; font-weight: bold; text-align: right; font-size: 15px;">
+                合計變動：<span id="cart-total-val" style="color: red;">0</span> 元
+            </div>
+        </div>
+
+        <button id="ok-btn" class="action-btn" onclick="doTrade()">確認交易送出</button>
+        <button id="reset-btn" class="action-btn" onclick="resetToScan()">取消 / 重新掃描</button>
+    </div>
+</div>
+
+<div id="custom-modal">
+    <div class="modal-content">
+        <div class="modal-header">✅ 交易成功！</div>
+        <div id="modal-body-content" class="modal-body"></div>
+        <button class="modal-btn" onclick="closeModal()">確定</button>
+    </div>
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbzI8YIKfK2h5MVeUOWE1oJq4mHu4KguUOVS_gt0wZdHvSz1AaDaOaE8jCD0rmz9q9SV/exec";
+const TOKEN = "abc123";
+let scanner = null, globalId = "", currentAmt = 0, currentNote = "餅乾", oldBalance = 0;
+let cart = []; // 🚀 存放購物車項目的陣列
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep(freq = 1200, duration = 0.1) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.8, audioCtx.currentTime); 
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+const successSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+successSound.crossOrigin = "anonymous";
+successSound.volume = 0.3;
+
+function initAndStart() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    successSound.load(); 
+    document.getElementById("start-btn").style.display = "none";
+    document.getElementById("reader").style.display = "block";
+    startScan();
+}
+
+async function startScan() {
+    if (!scanner) scanner = new Html5Qrcode("reader");
+    try {
+        await scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
+            playBeep(); globalId = text.trim(); scanner.stop().then(() => fetchData());
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function fetchData() {
+    document.getElementById("reader").style.display = "none";
+    document.getElementById("trade-ui").style.display = "block";
+    document.getElementById("display-name").innerText = "連線中...";
+    try {
+        const res = await fetch(`${scriptURL}?id=${globalId}&amount=0&token=${TOKEN}`);
+        const data = await res.json();
+        if (data.status === "success") {
+            oldBalance = data.balance;
+            document.getElementById("display-id").innerText = "ID: " + globalId;
+            document.getElementById("display-name").innerText = data.name;
+            document.getElementById("display-balance").innerText = data.balance;
+        } else { alert("查無資料"); resetToScan();
+        }
+    } catch (e) { alert("連線失敗"); resetToScan(); }
+}
+
+function modAmt(v) { 
+    currentAmt += v;
+    document.getElementById("amount-input").value = currentAmt; 
+}
+
+function manualInput(val) {
+    currentAmt = parseInt(val) || 0;
+}
+
+function setNote(btn, note) { 
+    document.querySelectorAll('.btn-item').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+    currentNote = note;
+}
+
+// 🚀 【新增】將當前設定加入購物車
+function addItemToCart() {
+    if (currentAmt === 0) return alert("請輸入有效金額再加入購物車");
+    cart.push({
+        note: currentNote,
+        amount: currentAmt
+    });
+    // 加入後自動將輸入金額歸零，方便點選下一件商品
+    currentAmt = 0;
+    document.getElementById("amount-input").value = "0";
+    renderCart();
+}
+
+// 🚀 【新增】單筆刪除購物車項目
+function delCartItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+// 🚀 【新增】動態渲染購物車介面與按鈕文字
+function renderCart() {
+    const sect = document.getElementById("cart-section");
+    const list = document.getElementById("cart-items-list");
+    const totalEl = document.getElementById("cart-total-val");
+    const btnOk = document.getElementById("ok-btn");
+    
+    if (cart.length === 0) {
+        sect.style.display = "none";
+        btnOk.innerText = "確認交易送出";
+        return;
     }
-  </script>
+    
+    sect.style.display = "block";
+    let html = "";
+    let total = 0;
+    cart.forEach((item, idx) => {
+        total += item.amount;
+        html += `<div class="cart-row">
+            <span>${idx + 1}. <b>${item.note}</b> (${item.amount > 0 ? '+' : ''}${item.amount}元)</span>
+            <button class="btn-del-item" onclick="delCartItem(${idx})">❌</button>
+        </div>`;
+    });
+    list.innerHTML = html;
+    totalEl.innerText = (total > 0 ? "+" : "") + total;
+    btnOk.innerText = `🛒 確認購物車送出 (${cart.length}筆)`;
+}
+
+function resetToScan() {
+    globalId = ""; currentAmt = 0; currentNote = "餅乾";
+    cart = []; // 🚀 重置購物車
+    renderCart();
+    
+    document.getElementById("amount-input").value = "0";
+    document.getElementById("trade-ui").style.display = "none";
+    document.getElementById("reader").style.display = "block";
+    
+    const btnOk = document.getElementById("ok-btn");
+    const btnReset = document.getElementById("reset-btn");
+    btnOk.disabled = false; btnOk.innerText = "確認交易送出";
+    btnReset.disabled = false;
+    
+    document.querySelectorAll('.btn-item').forEach((b, i) => b.classList.toggle('active', i === 0));
+    startScan();
+}
+
+function closeModal() { document.getElementById("custom-modal").style.display = "none"; resetToScan();
+}
+function createModalLine(label, value) { return `<div class="modal-line"><span class="modal-label">${label}</span><span class="modal-value">： ${value}</span></div>`;
+}
+
+// 🚀 【智慧升級】批次/單筆 交易送出邏輯
+async function doTrade() {
+    let tradesToSend = [];
+    
+    // 如果購物車有東西，就用購物車的清單；沒有的話就抓現在畫面上填的單筆
+    if (cart.length > 0) {
+        tradesToSend = [...cart];
+    } else {
+        if (currentAmt === 0) return alert("請輸入金額或加入購物車");
+        tradesToSend.push({ note: currentNote, amount: currentAmt });
+    }
+    
+    const btnOk = document.getElementById("ok-btn");
+    const btnReset = document.getElementById("reset-btn");
+    const btnAddCart = document.getElementById("add-cart-btn");
+    
+    btnOk.disabled = true; 
+    btnOk.innerText = "⏳ 交易進行中...";
+    btnReset.disabled = true;
+    if(btnAddCart) btnAddCart.disabled = true;
+    
+    try {
+        let finalNewBalance = oldBalance;
+        let finalName = "";
+        let detailsHtml = "";
+        
+        // 🚀 核心排隊機制：依序幫同一位學員發送多筆交易明細
+        for (let i = 0; i < tradesToSend.length; i++) {
+            const t = tradesToSend[i];
+            if (tradesToSend.length > 1) {
+                btnOk.innerText = `⏳ 進行中 (${i+1}/${tradesToSend.length})`;
+            }
+            // 利用時間戳附加索引確保 tid 唯一
+            const res = await fetch(`${scriptURL}?id=${globalId}&amount=${t.amount}&token=${TOKEN}&note=${encodeURIComponent(t.note)}&tid=T${Date.now()}_${i}`);
+            const data = await res.json();
+            
+            if (data.status === "success") {
+                finalNewBalance = data.newBalance;
+                finalName = data.name;
+                detailsHtml += `<div style="font-size:15px; margin-bottom:4px; padding-left:10px;">• ${t.note}：<b>${t.amount > 0 ? '+' : ''}${t.amount}元</b></div>`;
+            } else { 
+                alert(`❌ 第 ${i+1} 筆失敗：` + data.message);
+                btnOk.disabled = false;
+                btnReset.disabled = false;
+                if(btnAddCart) btnAddCart.disabled = false;
+                renderCart();
+                return;
+            }
+        }
+        
+        // 全部成功後播放音效與彈出整合視窗
+        successSound.play().catch(()=>{});
+        let infoHTML = createModalLine("【學員 ID】", globalId) + 
+                       createModalLine("【學員姓名】", finalName) + 
+                       `<div class="modal-line" style="margin-bottom:5px;"><span class="modal-label">【交易明細】</span>：</div>
+                        <div style="background:#f5f5f5; border-radius:10px; padding:8px; margin-bottom:12px; text-align:left;">${detailsHtml}</div>` + 
+                       createModalLine("【原金額】", oldBalance) + 
+                       createModalLine("【新餘額】", finalNewBalance);
+                       
+        document.getElementById("modal-body-content").innerHTML = infoHTML;
+        document.getElementById("custom-modal").style.display = "flex";
+        
+        cart = []; // 交易成功清空購物車
+    } catch (e) { 
+        alert("網路錯誤或連線逾時，請檢查 Google 試算表後台！");
+        btnOk.disabled = false; 
+        btnReset.disabled = false;
+        if(btnAddCart) btnAddCart.disabled = false;
+        renderCart();
+    }
+}
+</script>
 </body>
 </html>
