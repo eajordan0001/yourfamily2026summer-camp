@@ -129,14 +129,15 @@
         </div>
         
         <div class="grid-4">
-            <button class="btn-quick q-plus" onclick="modAmt(1)">+1</button>
-            <button class="btn-quick q-plus" onclick="modAmt(5)">+5</button>
-            <button class="btn-quick q-plus" onclick="modAmt(10)">+10</button>
-            <button class="btn-quick q-plus" onclick="modAmt(50)">+50</button>
             <button class="btn-quick q-minus" onclick="modAmt(-1)">-1</button>
             <button class="btn-quick q-minus" onclick="modAmt(-5)">-5</button>
             <button class="btn-quick q-minus" onclick="modAmt(-10)">-10</button>
             <button class="btn-quick q-minus" onclick="modAmt(-50)">-50</button>
+            <button class="btn-quick q-plus" onclick="modAmt(1)">+1</button>
+            <button class="btn-quick q-plus" onclick="modAmt(5)">+5</button>
+            <button class="btn-quick q-plus" onclick="modAmt(10)">+10</button>
+            <button class="btn-quick q-plus" onclick="modAmt(50)">+50</button>
+
         </div>
 
         <div class="sticky-nav">
@@ -168,6 +169,7 @@
             <div class="category-container" id="cat-survive">
                 <div class="category-title">🛡️ 2. 生存消費</div>
                 <div class="grid-3">
+                    <button class="btn-item" onclick="selectItem(this, '生存基金', 0)">生存基金<span class="item-price">-20</span></button>
                     <button class="btn-item" onclick="selectItem(this, '水彈', -20)">水彈<span class="item-price">-20</span></button>
                     <button class="btn-item" onclick="selectItem(this, '長槍', -20)">長槍<span class="item-price">-20</span></button>
                     <button class="btn-item" onclick="selectItem(this, '勇氣險(滑降)', -20)">勇氣險<br>(滑降)<span class="item-price">-20</span></button>
