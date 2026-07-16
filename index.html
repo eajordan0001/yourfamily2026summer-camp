@@ -156,12 +156,14 @@
             <div class="category-container" id="cat-rent">
                 <div class="category-title">⛺ 1. 設備租借</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '桌子', -50)">桌子<span class="item-price">-50</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '桌子', -300)">桌子<span class="item-price">-300</span></button>
                     <button class="btn-item" onclick="selectItem(this, '小椅子', -20)">小椅子<span class="item-price">-20</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '歐式帳', -200)">歐式帳<span class="item-price">-200</span></button>
                     <button class="btn-item" onclick="selectItem(this, '帳篷', -100)">帳篷<span class="item-price">-100</span></button>
                     <button class="btn-item" onclick="selectItem(this, '大電風扇', -100)">大電風扇<span class="item-price">-100</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '吊床', -100)">吊床<span class="item-price">-100</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '充氣床', -300)">充氣床<span class="item-price">-300</span></button>
                     <button class="btn-item" onclick="selectItem(this, '躺椅', -150)">躺椅<span class="item-price">-150</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '野炊物資箱', -500)">野炊<br>物資箱<span class="item-price">-500</span></button>
                     <button class="btn-item" onclick="selectItem(this, '遺失工本費', -100)">遺失<br>工本費<span class="item-price">-100</span></button>
                 </div>
             </div>
@@ -170,25 +172,23 @@
                 <div class="category-title">🛡️ 2. 生存消費</div>
                 <div class="grid-3">
                     <button class="btn-item" onclick="selectItem(this, '生存基金', 0)">生存基金<span class="item-price">0</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '水彈', -20)">水彈<span class="item-price">-20</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '長槍', -20)">長槍<span class="item-price">-20</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '水彈', -50)">水彈<span class="item-price">-50</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '短槍', -20)">短槍<span class="item-price">-20</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '衝鋒槍', -50)">衝鋒槍<span class="item-price">-50</span></button>
                     <button class="btn-item" onclick="selectItem(this, '勇氣險(滑降)', -20)">勇氣險<br>(滑降)<span class="item-price">-20</span></button>
                     <button class="btn-item" onclick="selectItem(this, '勇氣險(垂降)', -20)">勇氣險<br>(垂降)<span class="item-price">-20</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '打火石', 0)">打火石<span class="item-price">0</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '打火機', -10)">打火機<span class="item-price">-10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '教練生火', -150)">教練生火<span class="item-price">-150</span></button>
                 </div>
             </div>
 
             <div class="category-container" id="cat-reward">
                 <div class="category-title">🏆 3. 獎勵金項目</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '全課獎金', 10)">全課獎金<span class="item-price">+10</span></button>
                     <button class="btn-item" onclick="selectItem(this, '責任獎金', 10)">責任獎金<span class="item-price">+10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '任務獎金', 10)">任務獎金<span class="item-price">+10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '勇氣險鼓勵金', 20)">勇氣險鼓勵金<span class="item-price">+20</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '▲點心販賣', 30)">▲點心販賣<span class="item-price">+30</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '▲午餐販賣', 50)">▲午餐販賣<span class="item-price">+50</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '任務結業獎金', 30)">任務<br>結業獎金<span class="item-price">+30</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '滑降勇氣險金', 40)">滑降<br>勇氣險金<span class="item-price">+40</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '垂降勇氣險金', 40)">垂降<br>勇氣險金<span class="item-price">+40</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '▲點心販賣', 50)">▲點心販賣<span class="item-price">+50</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '▲午餐販賣', 70)">▲午餐販賣<span class="item-price">+70</span></button>
                     <button class="btn-item" onclick="selectItem(this, '設備二手拍賣', 0)">設備<br>二手拍賣<span class="item-price">0</span></button>
                 </div>
             </div>
@@ -196,22 +196,23 @@
             <div class="category-container" id="cat-snack">
                 <div class="category-title">🍪 4. 點心部</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '蘋果汁', -10)">蘋果汁<span class="item-price">-10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '可爾必思', -10)">可爾必思<span class="item-price">-10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '舒跑', -10)">舒跑<span class="item-price">-10</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '餅乾', -15)">餅乾<span class="item-price">-15</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '布丁', -15)">布丁<span class="item-price">-15</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '蘋果汁', -15)">蘋果汁<span class="item-price">-15</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '可爾必思', -15)">可爾必思<span class="item-price">-15</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '舒跑', -15)">舒跑<span class="item-price">-15</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '餅乾', -20)">餅乾<span class="item-price">-20</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '布丁', -20)">布丁<span class="item-price">-20</span></button>
                 </div>
             </div>
 
             <div class="category-container" id="cat-restaurant">
                 <div class="category-title">🍜 5. 餐廳部</div>
                 <div class="grid-3">
-                    <button class="btn-item" onclick="selectItem(this, '營養什錦湯麵', -500)">營養什錦<br>湯麵<span class="item-price">-500</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '甜美雞肉咖哩飯', -500)">甜美雞肉<br>咖哩飯<span class="item-price">-500</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '香濃玉米濃湯', -250)">香濃<br>玉米濃湯<span class="item-price">-250</span></button>
-                    <button class="btn-item" onclick="selectItem(this, '珍珠冬瓜茶', -250)">珍珠<br>冬瓜茶<span class="item-price">-250</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '營養什錦麵', -700)">營養<br>什錦麵<span class="item-price">-700</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '甜美雞肉咖哩飯', -700)">甜美雞肉<br>咖哩飯<span class="item-price">-700</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '香濃玉米濃湯', -500)">香濃<br>玉米濃湯<span class="item-price">-500</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '法國土司', -500)">法國土司<span class="item-price">-500</span></button>
                     <button class="btn-item" onclick="selectItem(this, '紅茶', -10)">紅茶<span class="item-price">-10</span></button>
+                    <button class="btn-item" onclick="selectItem(this, '教練代煮', -800)">教練代煮<span class="item-price">-800</span></button>
                 </div>
             </div>
 
